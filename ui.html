@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="/node_modules/figma-plugin-ds/dist/figma-plugin-ds.css">
+
+<h1>Rectangle Creator</h1>
+
+<p>Count: <input id="count" value="8"></p>
+<button id="create" class="button button--primary">Create</button>
+<button id="cancel" class="button button--secondary">Cancel</button>
+
+<!-- <script>
+
+document.getElementById('create').onclick = () => {
+const textbox = document.getElementById('count');
+const count = parseInt(textbox.value, 10);
+parent.postMessage({ pluginMessage: { type: 'create-rectangles', count } }, '*')
+}
+
+document.getElementById('cancel').onclick = () => {
+parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+}
+
+</script> -->

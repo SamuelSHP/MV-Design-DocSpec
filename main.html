@@ -1,0 +1,228 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/thomas-lowry/figma-plugin-ds/dist/figma-plugin-ds.css"/>
+<!-- <link rel="stylesheet" href="./src/style.css"/> -->
+<style>
+    .container{
+        padding: 16px;
+    }
+
+    .frameInfoSection{
+        margin-bottom: 24px;
+    }
+
+    .frameInfoPanel{
+        display: flex;
+        width: 100%;
+        align-items: flex-start;
+        align-content: flex-start;
+        flex-wrap: wrap;
+        font-size: small;
+        margin: 12px 0px;
+        background-color: #FAFAFA;
+        border: #EEEEEE 1px solid;
+        border-radius: 4px;
+    }
+
+    .frameInfoItem{
+        display: flex;
+        /* overflow: hidden;
+        text-overflow: ellipsis; */
+        width: 100%;
+        padding: 8px;
+        justify-content: start;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .button-wrapper{
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 32px;
+    }
+
+    .componentDetail{
+        padding-bottom: 16px;
+    }
+
+    table{
+        border-spacing: 0px;
+        margin: 8px 0px;
+    }
+
+    thead{
+        background-color: #FAFAFA;
+        font-size: smaller;
+        font-weight: 500;
+    }
+    td{
+        /* width: 100%; */
+        border-bottom: #EEEEEE 1px solid;
+        font-size: smaller;
+        padding: 4px;
+    }
+    tr:hover{
+        background-color: #f8f8f8;
+    }
+</style>
+<div class="container">
+    <!-- Table -->
+    
+    <div id="resultContainer">
+        <div class="frameInfoSection">
+            <div class="type type--xlarge type--bold">Frame Information</div>
+            <div class="frameInfoPanel">
+                <div class="frameInfoItem" id="frameNameInfo"></div>
+                <div class="frameInfoItem" id="frameFeatureInfo"></div>
+                <div class="frameInfoItem" id="framePageInfo"></div>
+                <div class="frameInfoItem" id="frameClusterInfo"></div>
+                <div class="frameInfoItem" id="frameModuleInfo"></div>
+            </div>
+        </div>
+
+        <div class="componentDetail" id="groupcomponent">
+            <div class="type type--xlarge type--bold">Components <span id="componentCountItem"></span></div>
+            <table>
+                <thead>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td style="width: 80%;">Name</td>
+                        <td style="width: 25%;">Type</td>
+                        <td>Other</td>
+                    </tr>
+                </thead>
+                <tbody id="tBody_component">
+                    <!-- <tr>
+                        <td colspan="3">No Data</td>
+                    </tr> -->
+                    <!-- <tr>
+                        <td name="componentType">String</td>
+                        <td name="componentName">Code</td>
+                        <td name="componentOther">-</td>
+                    </tr> -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="groupAction">
+            <div class="type type--xlarge type--bold">Actions <span id="actionCountItem"></span></div>
+            <table>
+                <thead>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td style="width: 25%;">Name</td>
+                        <td style="width: 80%;">Redirect</td>
+                    </tr>
+                </thead>
+                <tbody id="tBody_action">
+                    <!-- <tr><td colspan="2">No Data</td></tr> -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="button-wrapper">
+        <button id="analyzeButton" class="button button--primary">Analyze</button>
+        <button id="showDataButton" class="button button--secondary">Show Data</button>
+    </div>
+
+</div>
+
+<script src="path/to/figma-plugin-ds/figma-plugin-ds.js"></script>
+<script>
+document.getElementById('analyzeButton').onclick = function() {
+    // Send a message to the main plugin code to trigger the analysis
+    parent.postMessage({ pluginMessage: { type: 'analyze' } }, '*');      
+};
+document.getElementById('showDataButton').onclick = function() {
+    parent.postMessage({ pluginMessage: { type: 'showData' } }, '*');
+}
+
+onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+
+    if (msg.type === 'analysisResult') {
+        displayResult(msg.result);
+    }
+};
+
+const addRowButton = document.getElementById('addRowButton');
+
+
+function displayResult(result) {
+    
+    resetTable('component');
+    resetTable('action');
+    
+    document.getElementById('frameNameInfo').innerHTML = "<b>Name: </b>"+ result.frame.name;
+    document.getElementById('frameFeatureInfo').innerHTML = "<b>Feature: </b>"+ result.feature.name;
+    document.getElementById('framePageInfo').innerHTML = "<b>Page: </b>"+ result.page.name;
+    document.getElementById('frameClusterInfo').innerHTML = "<b>Cluster: </b>"+ result.cluster.name;
+    document.getElementById('frameModuleInfo').innerHTML = "<b>Module: </b>"+ result.module.name;
+    
+    for (const key in result.childrenGroup) {
+        if (Object.hasOwnProperty.call(result.childrenGroup, key)) {
+            const element = result.childrenGroup[key];
+            addRow(key, element);
+        }
+    }
+    addSelectNodeButtonListener();
+}
+
+function resetTable(groupName) {
+    const tbody = document.getElementById('tBody_'+groupName);
+    const countInfo = document.getElementById(groupName+'CountItem');
+    tbody.innerHTML = '';
+    countInfo.innerHTML = '';
+}
+
+// Function to add a new row to the table
+function addRow(groupName, data) {
+    for (let i = 0; i < data.length; i++) {  
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = addCell(data[i], i);
+        document.getElementById('tBody_'+groupName).appendChild(newRow);
+        document.getElementById(groupName+'CountItem').innerHTML = "("+data.length+")";
+    } 
+    
+}
+
+function addCell(data, i) {
+
+    var cell = '';
+    var inputText = `<div class="input"><input type="input" class="input__field" placeholder="Insert value..."></div>`;
+    
+
+    for (const key in data) {
+        if (key === 'id') {
+            cell += `<td><div class="icon-button selectNodeButton" data-nodeid="`+data[key]+`"><div class="icon icon--search"></div></div></td>`;
+        }
+
+        if (key !== 'id'){
+            if(data[key] !== null){
+                cell += `<td>`+data[key]+`</td>`;
+            }else{
+                cell += `<td>`+inputText+`</td>`;
+            }
+        }
+
+    }
+    return cell;
+}
+
+// Function to add the event listener to selectNodeButton elements
+function addSelectNodeButtonListener() {
+    document.querySelectorAll('.selectNodeButton').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const nodeIdToSelect = event.currentTarget.getAttribute('data-nodeid');
+            
+            parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
+        });
+    });
+}
+
+// Initial setup of the event listener after rendering the initial DOM
+document.addEventListener('DOMContentLoaded', function() {
+    addSelectNodeButtonListener();
+});
+</script>
