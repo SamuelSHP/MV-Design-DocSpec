@@ -4,15 +4,19 @@
   "api": "1.0.0",
   "main": "dist/code.js",
   "capabilities": [],
+  "enablePrivatePluginApi": true,
   "enableProposedApi": false,
   "editorType": [
     "figma"
   ],
-  "ui": "main.html",
+  "ui": {
+    "main": "main.html",
+    "secondary": "ui.html"
+  },
   "networkAccess": {
     "allowedDomains": [
       "https://cdn.jsdelivr.net",
-      "https://jsonplaceholder.typicode.com/"
+      "https://data-migration.machinevision.global/"
     ]
   }
 }
