@@ -95,7 +95,7 @@ figma.ui.onmessage = msg => {
         },
         childrenGroup:  allComponents //childrenComponent
       }
-
+      console.log(childrenComponent);
       selectedFrame.setPluginData('frameData', JSON.stringify(frameData));
       figma.notify('Analyze done! \uD83C\uDF89 Click Show Data.');
     }else figma.notify('Please select a Frame');
@@ -242,7 +242,7 @@ function setComponentGroup(): Object | undefined {
             refinedID: controller.componentData.refinedID,
             name: controller.componentData.name,
             type: controller.componentData.type,
-            required: controller.componentData.required,
+            isRequired: controller.componentData.required,
             draggable: controller.componentData.draggable,
             properties: allProps
           });
