@@ -50,6 +50,12 @@ figma.ui.onmessage = msg => {
   if (msg.type === 'selectNodeById') {
     const nodeIdToSelect = msg.nodeId;
     selectNodeById(nodeIdToSelect);
+
+  }
+
+  if (msg.type === 'getComponentFrameID'){
+    const selectedFrameID = figma.currentPage.selection[0].id;
+    figma.ui.postMessage({ type: 'getComponentFrameID', result: selectedFrameID });
   }
     
   if (msg.type === 'analyze') {
