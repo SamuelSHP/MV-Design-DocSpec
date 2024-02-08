@@ -53,9 +53,14 @@ figma.ui.onmessage = msg => {
 
   }
 
-  if (msg.type === 'getComponentFrameID'){
-    const selectedFrameID = figma.currentPage.selection[0].id;
-    figma.ui.postMessage({ type: 'getComponentFrameID', result: selectedFrameID });
+  if (msg.type === 'getComponentFrameData'){
+    const selectedFrame = figma.currentPage.selection[0];
+    const frame = {
+      id: selectedFrame.id,
+      name: selectedFrame.name
+    };
+    
+    figma.ui.postMessage({ type: 'setComponentFrameData', result: frame });
   }
     
   if (msg.type === 'analyze') {
