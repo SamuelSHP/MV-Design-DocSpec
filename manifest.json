@@ -11,12 +11,17 @@
   ],
   "ui": {
     "main": "main.html",
-    "secondary": "ui.html"
+    "view": "view.html"
   },
   "networkAccess": {
     "allowedDomains": [
       "https://cdn.jsdelivr.net",
-      "https://data-migration.machinevision.global/"
+      "https://data-migration.machinevision.global",
+      "https://core.mvtool.machinevision.global",
+      "https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css",
+      "https://datacore.mvtool.machinevision.global",
+      "https://pbs.twimg.com/profile_images/1276049846177169408/lKaTYJG0_400x400.jpg"
+
     ]
   }
 }

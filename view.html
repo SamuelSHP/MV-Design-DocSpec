@@ -1,0 +1,441 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/thomas-lowry/figma-plugin-ds/dist/figma-plugin-ds.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+<link rel="stylesheet" href="/node_modules/figma-plugin-ds/dist/figma-plugin-ds.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<style>
+    .button-wrapper{
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 32px;
+    }
+    .tablinks.active {
+        color: rgb(0, 0, 0);
+        font-weight: bolder;
+    }
+    th, td {
+        padding: 8px; 
+        border: 1px solid #e2e8f0; 
+    }
+</style>
+<div class="p-3">
+    <div class="button-wrapper">
+        <!-- Button Analys & Show Data-->
+       <div class="flex">
+            <button id="analyzeButton" class="button button--primary mr-2">Analyze</button>
+            <button id="showDataButton" class="button button--secondary">Show Data</button>
+       </div>
+       <!-- Button ChangeLog and Submit Data-->
+       <div style="display: flex; ">
+            <button onclick="showChangeLog()" class="text-blue-600 text-xs mr-3">Changelog</button>
+            <button onclick="submitData()" class="button button--primary">Submit</button>
+        </div> 
+    </div>
+    <!-- SELECT TYPE DATA -->
+    <div id="typedata" class="mt-2">
+        <label for="typeFrame">Type:</label>
+        <select id="typeFrame" name="typeFrame">
+        </select>
+    </div>
+    <div id="resultContainer" class="mt-2">
+        <!-- Frame Data Section -->
+        <div class="frameInfoSection">
+            <div class="type type--xlarge type--bold">Frame Information</div>
+            <div class="frameInfoPanel">
+                <table class="w-full text-sm text-left rtl:text-right text-gray-500 border">
+                    <thead class="text-xs text-blue-700 font-bold bg-blue-200">
+                        <tr><th>Name</th><th>Feature</th><th>Page</th><th>Cluster</th><th>Module</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><div class="frameInfoItem" id="frameNameInfo"></div></td>
+                            <td><div class="frameInfoItem" id="frameFeatureInfo"></div></td>
+                            <td><div class="frameInfoItem" id="framePageInfo"></div></td>
+                            <td><div class="frameInfoItem" id="frameClusterInfo"></div></td>
+                            <td><div class="frameInfoItem" id="frameModuleInfo"></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Tabs -->
+        <div class="tabs flex justify-left mt-4">
+            <button class="tablinks mr-3 text-sm active" onclick="openTab(event, 'components')">Component</button>
+            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'action')">Action</button>
+            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'story')">User Story</button>
+            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'technical')">Technical Message</button>
+            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'ba')">BA Comment</button>
+        </div>
+        <!-- COMPONENT TAB -->
+        <div id="components" class="tabcontent mt-2">
+            <div class="componentDetail" id="groupcomponent">
+                <div class="bg-gray-200 rounded-lg h-auto">
+                    <div class="relative overflow-x-auto rounded-lg">
+                        <table id="tableComponent" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
+                            <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                                <tr>
+                                    <td>&nbsp;</td><td>Name</td><td>Type</td><td>Required</td><td>Dragable</td>
+                                    <td>
+                                        <input id="checkAllRows" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody class="p-2"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-left mt-4">
+                <button id="test" class="text-blue-600 text-xs" onclick="addRowToTableComponent()">+ Add component other</button>
+            </div>
+        </div>
+        <!-- Action Tabs -->
+        <div id="action" class="tabcontent mt-2" style="display:none;">
+            <div id="groupAction">
+                <div class="bg-gray-200 rounded-lg h-auto">
+                    <div class="relative overflow-x-auto rounded-lg">
+                        <table id="tableAction" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
+                            <thead class="text-xs text-blue-700  bg-blue-200 font-bold p-2">
+                                <tr>
+                                    <td>&nbsp;</td><td>Name</td><td>Redirect</td><td>Alert Prompt</td>
+                                    <td>
+                                        <input id="checkAllRowsAction" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody class="p-2"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-left mt-4">
+                <button id="test" class="text-blue-600 text-xs" onclick="addRowToTableAction()">+ Add action other</button>
+            </div>
+        </div>
+        <!-- User Story Tabs -->
+        <div id="story" class="tabcontent mt-2" style="display:none;">
+            <div id="userStory">
+                <div id="divnamestory">
+                    <label for="namestory" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sebagai</label>
+                    <input type="text" id="namestory" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="misal: Admin">
+                </div>
+                <div class="mt-2" id="divmessagestory">
+                    <label for="messagestory" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Saya ingin</label>
+                    <input type="text" id="messagestory" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="misal: dapat melakukan setting terhadap approval ordernya">
+                </div>
+            </div>
+            <div class="flex justify-left mt-4">
+                <button id="test" class="text-blue-600 text-xs" onclick="addUserStory()">+ Add user story other</button>
+            </div>
+        </div>
+        <!-- TL Tabs -->
+        <div id="technical" class="tabcontent mt-2" style="display:none;">
+            <div id="technicalLead">
+                    <label for="messagetech" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Message</label>
+                    <textarea id="messagetech" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write message..."></textarea>
+            </div>
+            <div class="flex justify-left mt-4">
+                <button id="test" class="text-blue-600 text-xs" onclick="addTLMessage()">+ Add message other</button>
+            </div>
+        </div>
+        <!-- BA Tabs -->
+        <div id="ba" class="tabcontent mt-2" style="display:none;">
+            <div id="bisnisAnalys">
+                    <label for="baComment" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comment</label>
+                    <textarea id="baComment" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write comment..."></textarea>    
+            </div>
+            <div class="flex justify-left mt-4">         
+                <button id="test" class="text-blue-600 text-xs" onclick="addBAComment()">+ Add comment other</button>
+            </div>
+        </div>
+    </div>
+
+   
+
+</div>
+
+<script src="path/to/figma-plugin-ds/figma-plugin-ds.js"></script>
+<script>
+// Function Analys Button 
+document.getElementById('analyzeButton').onclick = function() {
+    parent.postMessage({ pluginMessage: { type: 'analyze' } }, '*');      
+};
+// Function Show Button
+document.getElementById('showDataButton').onclick = function() {
+    parent.postMessage({ pluginMessage: { type: 'showData' } }, '*');
+}
+// On Message From Figma
+onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (msg.type === 'analysisResult') {
+        displayResult(msg.data.resultAnalys);
+        populateTableComponent(msg.data.populateResult?.dataComponent);
+        populateTableAction(msg.data.populateResult?.dataAction, msg.data.dataGET);
+    }
+};
+// TYPE DATA SELECT FUNCTION
+var dynamicOptions = ['FRAME', 'DROPDOWN', 'MODAL', 'NOTIFICATION', 'AAA', 'BBB', 'CCC'];
+var selectDropdown = document.getElementById('typeFrame');
+dynamicOptions.forEach(function(optionValue) {
+    var option = document.createElement('option');
+    option.value = optionValue;
+    option.text = optionValue;
+    selectDropdown.add(option);
+});
+var typeFrameSelect = document.getElementById("typeFrame");
+typeFrameSelect.addEventListener("change", function () {
+    selectedValue = typeFrameSelect.value;
+    console.log("Selected Type:", selectedValue);
+});
+
+
+
+const addRowButton = document.getElementById('addRowButton');
+
+// Function Display Frame
+function displayResult(result) {
+    document.getElementById('frameNameInfo').innerHTML = result.frame.name;
+    document.getElementById('frameFeatureInfo').innerHTML = result.feature.name;
+    document.getElementById('framePageInfo').innerHTML = result.page.name;
+    document.getElementById('frameClusterInfo').innerHTML = result.cluster.name;
+    document.getElementById('frameModuleInfo').innerHTML = result.module.name;
+    
+    addSelectNodeButtonListener();
+}
+
+// TABLE COMPONENT
+function populateTableComponent(data) {
+    const tableBody = document.getElementById('tableComponent').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = "";
+    console.log("TC", data)
+    for(let item of data){
+        let row = tableBody.insertRow();
+        let searchIconCell = row.insertCell(0);
+        let nameCell = row.insertCell(1);
+        let typeCell = row.insertCell(2);
+        let requiredCell = row.insertCell(3);
+        let dragableCell = row.insertCell(4);
+        let checkboxCell = row.insertCell(5);
+        searchIconCell.innerHTML = `
+        <button class="icon-button selectNodeButton" data-nodeid="`+item.id+`"><div class="icon icon--search"></div></button>
+        `;
+        // Adding editable input for name
+        let nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = item.name; // Set initial value
+        nameCell.appendChild(nameInput);
+        // Adding editable input for type
+        let typeInput = document.createElement('input');
+        typeInput.type = 'text';
+        typeInput.value = item.type; // Set initial value
+        typeCell.appendChild(typeInput);
+        // input required
+        let radioRequired = document.createElement('input');
+        radioRequired.type = 'checkbox';
+        radioRequired.setAttribute('name', 'isRequired_' + item.id); // Menggunakan ID item untuk nama yang unik
+        radioRequired.setAttribute('value', item.required);
+        requiredCell.appendChild(radioRequired);
+        // Adding dragable
+        let radioDragable = document.createElement('input');
+        radioDragable.type = 'checkbox';
+        radioDragable.setAttribute('name', 'dragAble_' + item.id); // Menggunakan ID item untuk nama yang unik
+        radioDragable.setAttribute('value', item.id);
+        dragableCell.appendChild(radioDragable);
+        // Adding check input
+        let checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.setAttribute('name', 'rowCheckbox');
+        checkbox.setAttribute('value', item.id);
+        checkboxCell.appendChild(checkbox);
+
+        // Add event listeners for input fields
+        nameInput.addEventListener('input', function () {
+            item.name_component = nameInput.value;
+            updateData();
+        });
+
+        // Add event listeners for input fields
+        typeInput.addEventListener('input', function () {
+            item.type_component = typeInput.value;
+            updateData();
+        });
+
+        // Add event listeners for input fields
+        radioRequired.addEventListener('input', function () {
+            item.required_component = radioRequired.value;
+            updateData();
+        });
+
+        // Add event listeners for input fields
+        radioDragable.addEventListener('input', function () {
+            item.dragable_component = radioDragable.value;
+            updateData();
+        });
+    };
+    // Menambahkan event listener pada checkbox "Check All Rows"
+    document.getElementById('checkAllRows').addEventListener('change', function() {
+        const checkboxes = document.getElementsByName('rowCheckbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
+    function updateData(){
+        nameComponent.length = 0;
+        typeComponent.length = 0;
+        reqComponent.length = 0;
+        dragComponent.length = 0;
+        data.forEach(item => {
+            nameComponent.push({name: item.name_component})
+            typeComponent.push({type: item.type_component});
+            reqComponent.push({isRequred: item.required_component});
+            dragComponent.push({dragAble: item.dragable_component});
+
+        });
+    }
+}
+
+// TABLE ACTION
+function populateTableAction(data, data2) {
+    const tableBody = document.getElementById('tableAction').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = "";
+    data.forEach(item => {
+        let row = tableBody.insertRow();
+        let searchIconCell = row.insertCell(0);
+        let nameCell = row.insertCell(1);
+        let redirectCell = row.insertCell(2);
+        let alertCell = row.insertCell(3);
+        let checkboxCell = row.insertCell(4);
+        searchIconCell.innerHTML = `
+        <button class="icon-button selectNodeButton" data-nodeid="`+item.id+`"><div class="icon icon--search"></div></button>  
+        `;
+        let nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.setAttribute('name', 'name_action');
+        nameInput.setAttribute('value', item.name); 
+        nameCell.appendChild(nameInput);
+        // Adding select box for page_redirect
+        let selectRedirect = document.createElement('select');
+        selectRedirect.setAttribute('name', 'page_redirect');
+        var dynamicOptions = data2.parent_id.childs;
+        let optionRedirect;
+        dynamicOptions.map(item => {
+            optionRedirect = document.createElement('option');
+            optionRedirect.value = item.id;
+            optionRedirect.text = item.name;
+            selectRedirect.appendChild(optionRedirect);
+        });
+        redirectCell.appendChild(selectRedirect);
+        selectRedirect.addEventListener('change', function () {
+            console.log('Selected value:', this.value);
+        });
+        // Adding select box for alert_prompt
+        let selectAlert = document.createElement('select');
+        selectAlert.setAttribute('name', 'page_redirect');
+        var dynamicOptions = data2.parent_id.childs;
+        let optionAlert;
+        dynamicOptions.map(item => {
+            optionAlert = document.createElement('option');
+            optionAlert.value = item.id;
+            optionAlert.text = item.name;
+            selectAlert.appendChild(optionAlert);
+        });
+        alertCell.appendChild(selectAlert);
+        selectAlert.addEventListener('change', function () {
+            console.log('Selected value:', this.value);
+        });
+        // Adding check input
+        let checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.setAttribute('name', 'rowCheckbox');
+        checkbox.setAttribute('value', item.id);
+        checkboxCell.appendChild(checkbox);
+        // Add event listeners for input fields
+        nameInput.addEventListener('input', function () {
+            item.name_action = nameInput.value;
+            updateData();
+        });
+
+        // // Add event listeners for input fields
+        // inputRedirect.addEventListener('input', function () {
+        //     item.page_redirect = inputRedirect.value;
+        //     updateData();
+        // });
+
+        // inputAlert.addEventListener('input', function () {
+        //     item.alert_prompt = inputAlert.value;
+        //     updateData();
+        // });
+        
+
+    });
+    // Menambahkan event listener pada checkbox "Check All Rows"
+    document.getElementById('checkAllRowsAction').addEventListener('change', function() {
+        const checkboxes = document.getElementsByName('rowCheckbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
+    function updateData(){
+        nameAction.length = 0;
+        alertPrompt.length = 0;
+        redirectData.length = 0;
+        data.forEach(item => {
+            nameAction.push({name: item.name_action})
+            alertPrompt.push({alert: item.alert_prompt});
+            redirectData.push({redirect: item.page_redirect});
+
+        });
+        // console.log("teh",nameAction);
+        // console.log(redirectData);
+    }
+}
+
+
+
+// Function to add the event listener to selectNodeButton elements
+function addSelectNodeButtonListener() {
+    document.querySelectorAll('.selectNodeButton').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const nodeIdToSelect = event.currentTarget.getAttribute('data-nodeid');
+            
+            parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
+        });
+    });
+}
+
+// Initial setup of the event listener after rendering the initial DOM
+document.addEventListener('DOMContentLoaded', function() {
+    addSelectNodeButtonListener();
+});
+
+
+// Function Tab
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+        var childNodes = tablinks[i].childNodes;
+        for (var j = 0; j < childNodes.length; j++) {
+            if (childNodes[j].classList) {
+                childNodes[j].classList.remove("active-text");
+            }
+        }
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.classList.add("active");
+    var textElement = evt.currentTarget.childNodes[0];
+    if (textElement && textElement.classList) {
+        textElement.classList.add("active-text");
+    }
+}
+
+</script>

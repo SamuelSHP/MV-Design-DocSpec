@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/thomas-lowry/figma-plugin-ds/dist/figma-plugin-ds.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+
+    <style>
+    .container{
+        padding: 16px;
+    }
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 23px;
+        height: 13px;
+    }
+    .switch input { 
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 9px;
+        width: 10px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+    input:checked + .slider {
+        background-color: #00a128;
+    }
+    input:focus + .slider {
+        box-shadow: 0 0 1px #00a128;
+    }
+    input:checked + .slider:before {
+        -webkit-transform: translateX(10px);
+        -ms-transform: translateX(10px);
+        transform: translateX(10px);
+    }
+    .tablinks.active {
+        color: rgb(0, 0, 0);
+        font-weight: bolder;
+    }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">    
+        <div style="display: flex; justify-content: flex-start; margin-bottom: 4dvh;">
+            <button onclick="backView()" class="text-blue-600 text-xs mr-3">Back</button>
+        </div>
+      
+        <div id="resultContainer">
+            <div class="frameInfoSection">
+                <div class="type type--xlarge type--bold">Change Log</div>
+                <div class="bg-gray-200 rounded-lg h-auto mt-2">
+                    <div class="relative overflow-x-auto rounded-lg">
+                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 border">
+                            <thead class="text-xs text-blue-700 font-bold bg-blue-200 mx-2">
+                                <tr>
+                                    <td>Date</td>
+                                    <td>Author</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><div id="frameNameInfoBody"></div></td>
+                                    <td><div id="frameFeatureInfoBody"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    function backView() {
+        parent.postMessage({ pluginMessage: { type: 'backView' } }, '*');      
+    }
+
+    </script>
+</body>
+

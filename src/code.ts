@@ -1,23 +1,6 @@
 import { buttonTypeCheck, getIconNameInButton } from "./components/button";
 import componentMapping from './componentMapping';
 import * as controller from "./controller";
-import { all } from "axios";
-
-// Make a GET request
-// Example function to make a network request using fetch from Figma Docs
-async function makeNetworkRequest(filekey: String, node_id: String) {
-  const url = 'https://data-migration.machinevision.global/figma_frame?token=ycn-_GnCGhmtpxSNIQ8Nmy7aG8EQTCt9&file_key='+filekey+'&node_id='+node_id;
-
-  try {
-    const response = await fetch(url,{});
-
-    if (!response.ok) throw new Error(`Network request failed with status ${response.status}`); 
-    const data = await response.json();
-    console.log('Data:', data);
-  } catch (error) {
-    console.error('Error:');
-  }
-}
 
 interface ChildrenComponent {
   component: any[];
@@ -30,27 +13,63 @@ let childrenComponent: ChildrenComponent = {
 };;
 
 let componentCode: any;
+let selectedFrame: SceneNode
+let valSelectedNode: any
+let nodeIdToSelect
+let getName 
+let isSelected 
+let logResult
+let selectedNode 
+let syncData
+let syncDataJSON: any
+const apiUrl = "https://datacore.mvtool.machinevision.global";
+const urlMigration = "https://core.mvtool.machinevision.global"
+let token: any
+let populateResult: any
 
-// ------------------------------------
-
-// This file holds the main code for plugins. Code in this file has access to
-// the *figma document* via the figma global object.
-// You can access browser APIs in the <script> tag inside "ui.html" which has a
-// full browser environment (See https://www.figma.com/plugin-docs/how-plugins-run).
 console.clear();
-// This shows the HTML page in "ui.html".
-figma.showUI(__uiFiles__.main,{ width:700, height: 580, themeColors: false})
+figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
 figma.skipInvisibleInstanceChildren = true
 
-// Calls to "parent.postMessage" from within the HTML page will trigger this
-// callback. The callback will be passed the "pluginMessage" property of the
-// posted message.
-figma.ui.onmessage = msg => {
+// FUNCTION LOGIN
+function loginUser(url: string, email: string, password: string ) {
+  fetch(`${url}/auth/login`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+          mode: 'cookie',
+          email: email,
+          password: password,
+      }),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(res => {
+      token = res
+      console.log("data token", token.data.access_token)
+      figma.ui.postMessage({ type: 'login-success', data: res });
+      figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
+    
+  })
+  .catch(error => {
+      figma.ui.postMessage({ type: 'login-failed', error: error.toString() });
+  });
+}
+
+figma.ui.onmessage = async msg => {
+  if (msg.type === 'login') {
+    loginUser(apiUrl, msg.email, msg.password);
+  }
 
   if (msg.type === 'selectNodeById') {
     const nodeIdToSelect = msg.nodeId;
     selectNodeById(nodeIdToSelect);
-
   }
 
   if (msg.type === 'getComponentFrameData'){
@@ -59,23 +78,17 @@ figma.ui.onmessage = msg => {
       id: selectedFrame.id,
       name: selectedFrame.name
     };
-    
     figma.ui.postMessage({ type: 'setComponentFrameData', result: frame });
   }
     
   if (msg.type === 'analyze') {
-    const selectedFrame = figma.currentPage.selection[0];
+    selectedFrame = figma.currentPage.selection[0];
     if (selectedFrame && selectedFrame.type === 'FRAME') {
-      // Reset
       childrenComponent.component = [];
       childrenComponent.action = [];
-
       const parent = getParentElement(selectedFrame);
       inspectChildElement(selectedFrame);
-
-      // Collect Component dari Proses Inspect
       let allComponents = setComponentGroup();
-
       const frameData: Object = {
         id: figma.fileKey+"::::"+selectedFrame.id,
         file_key: figma.fileKey,
@@ -106,36 +119,187 @@ figma.ui.onmessage = msg => {
         },
         childrenGroup:  allComponents //childrenComponent
       }
-      console.log(childrenComponent);
       selectedFrame.setPluginData('frameData', JSON.stringify(frameData));
       figma.notify('Analyze done! \uD83C\uDF89 Click Show Data.');
     }else figma.notify('Please select a Frame');
   }
 
   if (msg.type === 'showData'){
-    const selectedFrame = figma.currentPage.selection[0];
+    selectedFrame = figma.currentPage.selection[0];
     if (selectedFrame && selectedFrame.type === 'FRAME') {
       const syncData = selectedFrame.getPluginData('frameData');
-    
+      
       if (syncData) {        
         let frameData = JSON.parse(syncData);
-        
-        // Output Test
-        console.log(frameData);
-        
-        figma.ui.postMessage({ type: 'analysisResult', result: frameData });
-
+        let fileKeyData = figma.fileKey
+        // let dataToken = token.data.access_token
+        let staticToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFhZGE1MDExLTgxMTUtNDY5MS05MDU3LTMwZDY1MWYwYTU2MCIsInJvbGUiOiI3ZTcyZDE2Ny0xODIwLTQ3MjQtYTYzNy1lNGNmZTkzYzI0M2MiLCJhcHBfYWNjZXNzIjp0cnVlLCJhZG1pbl9hY2Nlc3MiOnRydWUsImlhdCI6MTcwNzU1NjY4NiwiZXhwIjoxNzA3NTU3NTg2LCJpc3MiOiJkaXJlY3R1cyJ9.ViAEH_QXnOQmrCiAx-KbQpZgaKb0ey-NBVDkYzz1PoI"
+        await fetch(`${urlMigration}/figma_frame?name=${selectedFrame.name}&frame_id=${selectedFrame.id}&file_key=${fileKeyData}&token=${staticToken}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log("data", data)
+          console.log("syncDataJSON", frameData)
+      
+          let dataGET: any 
+          dataGET = data
+          let resultDataAction = frameData.childrenGroup.action
+          let getDataAction = dataGET.actionButton
+          let resultDataComponent = frameData.childrenGroup.component
+          let getDataComponent = dataGET.dataComponent
+          let resultDataUserStory = frameData.childrenGroup.userStory
+          let getDataUserStory = dataGET.userStory
+          let resultDataDescription = frameData.childrenGroup.detailDescription
+          let getDataDescription = dataGET.detailDescription
+      
+          populateResult = { 
+             dataAction: loopDataGetNew(getDataAction, resultDataAction),  
+             dataComponent: loopDataGetNew(getDataComponent, resultDataComponent),  
+             dataUserStory: getDataUserStory, resultDataUserStory,  
+             dataDescription: getDataDescription, resultDataDescription, 
+          }
+      
+          console.log("Act", populateResult)
+          
+          figma.ui.postMessage({ type: 'analysisResult', data: {dataGET: data, resultAnalys: frameData, populateResult} });
+        })
+        .catch(error => {
+          console.error('Fetch error:', error);
+        });
       } else {
         figma.notify('No data found')
       }
     }else figma.notify('Please select a Frame'); 
-
   }
-  
-  // Make sure to close the plugin when you're done. Otherwise the plugin will
-  // keep running, which shows the cancel button at the bottom of the screen.
-  // figma.closePlugin();
+
+  if (msg.type === 'showChangeLog') {
+    figma.showUI(__uiFiles__.changeLog,{ width:700, height: 580, themeColors: false})
+  }
+  if (msg.type === 'backView') {
+    figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
+  }
+  if (msg.type === 'submitData') {
+    let componentLength = populateResult.dataComponent.length;
+    let actionLength = populateResult.dataAction.length;
+
+    let dataComponentCreateArray:any[] = [];
+    let createActionArray:any[] = [];
+    let createUserStoryArray:any[] = [];
+    let createTechnicalArray:any[] = [];
+    let createBaCommentArray:any[] = [];
+
+    for (let i = 0; i < componentLength; i++) {
+      dataComponentCreateArray.push({
+        name: msg.name_component[i].name ,
+        type: msg.type_component[i].type ,
+        isRequired: msg.req_component[i].isRequired ,
+        dragable: msg.drag_component[i].dragAble 
+      });
+    }
+    for (let i = 0; i < actionLength; i++) {
+      createActionArray.push({
+        name: msg.name_action[i].name ,
+        alert_prompt: msg.alert_prompt[i].alert ,
+        page_redirect: msg.page_redirect[i].redirect 
+      });
+    }
+      createUserStoryArray.push({
+        roles: msg.name_story,
+        story: msg.message_story
+      });
+      createTechnicalArray.push({
+        id: "1233",
+        type: "T",
+        description: msg.message_tech
+      });
+      createTechnicalArray.push({
+        type: "BA",
+        description: msg.ba_comment
+      });
+
+    console.log("component", dataComponentCreateArray)  
+    console.log("action", createActionArray)
+    console.log("userstory", createUserStoryArray)  
+    console.log("technical", createTechnicalArray)
+    console.log("bacomment", createTechnicalArray)
+
+    fetch(`${urlMigration}/figma_frame`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+          token: token.data.access_token,
+          id: figma.fileKey+"::::"+selectedFrame.id,
+          file_key: figma.fileKey,
+          nodeId: valSelectedNode.id,
+          name: selectedFrame.name,
+          type: msg.type_frame,
+          actionButton: {
+            update: createActionArray,
+            delete: [],
+            create: []
+          },
+          dataComponent: {
+            update: dataComponentCreateArray,
+            delete: [],
+            create: []
+          },
+          userStory: {
+            update: createUserStoryArray,
+            delete: [],
+            create: []
+          },
+          detailDescription: {
+            update: createTechnicalArray,
+            delete: [],
+            create: []
+          },
+          figmaComment: {
+            update: [],
+            delete: [],
+            create: []
+          },
+      }),
+    })
+    .then(response => response.json())
+    .then(res => {
+        console.log('DataSend:', res);
+    })
+    .catch(error => {
+        console.error('DataSend failed:', error);
+    });
+  }
+ 
 };
+
+
+function loopDataGetNew(data1: any[], data2: { filter: (arg0: (item: any) => boolean) => { (): any; new(): any; length: number; }; map: (arg0: (itemRes: any) => void) => void; }){
+  let newData: any[] = []    
+  data1.map((itemGET: { id: any; }) => {
+          if(data2.filter((item: { id: any; })=>item.id === itemGET.id).length > 0){
+              newData.push(itemGET)
+          }
+      })
+      data2.map((itemRes: { id: any; }) => {
+          if(newData.filter((item: { id: any; })=>item.id !== itemRes.id)){
+              newData.push(itemRes)
+          }
+          else{
+              console.log("delete")
+          }
+      })
+      return newData
+}
 
 function selectNodeById(nodeId: string): void {
   const selectedNode = figma.getNodeById(nodeId);
