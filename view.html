@@ -37,6 +37,7 @@
     <div id="typedata" class="mt-2">
         <label for="typeFrame">Type:</label>
         <select id="typeFrame" name="typeFrame">
+            <option value="">select type</option>
         </select>
     </div>
     <div id="resultContainer" class="mt-2">
@@ -117,14 +118,14 @@
         <!-- User Story Tabs -->
         <div id="story" class="tabcontent mt-2" style="display:none;">
             <div id="userStory">
-                <div id="divnamestory">
-                    <label for="namestory" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Sebagai</label>
-                    <input type="text" id="namestory" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="misal: Admin">
-                </div>
-                <div class="mt-2" id="divmessagestory">
-                    <label for="messagestory" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Saya ingin</label>
-                    <input type="text" id="messagestory" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="misal: dapat melakukan setting terhadap approval ordernya">
-                </div>
+                <table id="userStoryTable" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
+                    <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                        <tr>
+                            <td>Name User</td><td>Message Story</td>
+                        </tr>
+                    </thead>
+                    <tbody class="p-2"></tbody>
+                </table>
             </div>
             <div class="flex justify-left mt-4">
                 <button id="test" class="text-blue-600 text-xs" onclick="addUserStory()">+ Add user story other</button>
@@ -133,8 +134,14 @@
         <!-- TL Tabs -->
         <div id="technical" class="tabcontent mt-2" style="display:none;">
             <div id="technicalLead">
-                    <label for="messagetech" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Message</label>
-                    <textarea id="messagetech" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write message..."></textarea>
+                <table id="technicalLeadTable" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
+                    <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                        <tr>
+                            <td>Message</td>
+                        </tr>
+                    </thead>
+                    <tbody class="p-2"></tbody>
+                </table>       
             </div>
             <div class="flex justify-left mt-4">
                 <button id="test" class="text-blue-600 text-xs" onclick="addTLMessage()">+ Add message other</button>
@@ -143,21 +150,36 @@
         <!-- BA Tabs -->
         <div id="ba" class="tabcontent mt-2" style="display:none;">
             <div id="bisnisAnalys">
-                    <label for="baComment" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comment</label>
-                    <textarea id="baComment" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write comment..."></textarea>    
+                <table id="bisnisAnalysTable" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
+                    <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                        <tr>
+                            <td>Comment</td>
+                        </tr>
+                    </thead>
+                    <tbody class="p-2"></tbody>
+                </table>         
             </div>
             <div class="flex justify-left mt-4">         
                 <button id="test" class="text-blue-600 text-xs" onclick="addBAComment()">+ Add comment other</button>
             </div>
         </div>
     </div>
-
-   
-
 </div>
 
 <script src="path/to/figma-plugin-ds/figma-plugin-ds.js"></script>
 <script>
+
+let data_action = [];
+let data_component = [];
+let selectedValue
+let new_component = []
+let new_action = []
+let story_name = []
+let story_message = []
+let tl_message = []
+let ba_comment = []
+
+
 // Function Analys Button 
 document.getElementById('analyzeButton').onclick = function() {
     parent.postMessage({ pluginMessage: { type: 'analyze' } }, '*');      
@@ -190,10 +212,6 @@ typeFrameSelect.addEventListener("change", function () {
     console.log("Selected Type:", selectedValue);
 });
 
-
-
-const addRowButton = document.getElementById('addRowButton');
-
 // Function Display Frame
 function displayResult(result) {
     document.getElementById('frameNameInfo').innerHTML = result.frame.name;
@@ -201,7 +219,6 @@ function displayResult(result) {
     document.getElementById('framePageInfo').innerHTML = result.page.name;
     document.getElementById('frameClusterInfo').innerHTML = result.cluster.name;
     document.getElementById('frameModuleInfo').innerHTML = result.module.name;
-    
     addSelectNodeButtonListener();
 }
 
@@ -209,7 +226,8 @@ function displayResult(result) {
 function populateTableComponent(data) {
     const tableBody = document.getElementById('tableComponent').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
-    console.log("TC", data)
+    console.log("WQW",data)
+    let dataComp = []
     for(let item of data){
         let row = tableBody.insertRow();
         let searchIconCell = row.insertCell(0);
@@ -235,13 +253,13 @@ function populateTableComponent(data) {
         let radioRequired = document.createElement('input');
         radioRequired.type = 'checkbox';
         radioRequired.setAttribute('name', 'isRequired_' + item.id); // Menggunakan ID item untuk nama yang unik
-        radioRequired.setAttribute('value', item.required);
+        radioRequired.setAttribute('value', item.isRequired);
         requiredCell.appendChild(radioRequired);
         // Adding dragable
         let radioDragable = document.createElement('input');
         radioDragable.type = 'checkbox';
         radioDragable.setAttribute('name', 'dragAble_' + item.id); // Menggunakan ID item untuk nama yang unik
-        radioDragable.setAttribute('value', item.id);
+        radioDragable.setAttribute('value', item.draggable);
         dragableCell.appendChild(radioDragable);
         // Adding check input
         let checkbox = document.createElement('input');
@@ -249,30 +267,37 @@ function populateTableComponent(data) {
         checkbox.setAttribute('name', 'rowCheckbox');
         checkbox.setAttribute('value', item.id);
         checkboxCell.appendChild(checkbox);
-
-        // Add event listeners for input fields
+        // EVENT LISTENER INPUT DATA ACTION
         nameInput.addEventListener('input', function () {
-            item.name_component = nameInput.value;
-            updateData();
+            item.name = nameInput.value;
+            updateData()
         });
-
-        // Add event listeners for input fields
         typeInput.addEventListener('input', function () {
-            item.type_component = typeInput.value;
-            updateData();
+            item.type = typeInput.value;
+            updateData()
+        });
+        radioRequired.addEventListener('change', function() {
+            item.isRequired = this.checked ;
+            updateData()
+        });
+        radioDragable.addEventListener('change', function () {
+            item.draggable = this.checked;
+            updateData()
         });
 
-        // Add event listeners for input fields
-        radioRequired.addEventListener('input', function () {
-            item.required_component = radioRequired.value;
-            updateData();
-        });
-
-        // Add event listeners for input fields
-        radioDragable.addEventListener('input', function () {
-            item.dragable_component = radioDragable.value;
-            updateData();
-        });
+        // Update Data Component
+        function updateData(){
+            data_component.length = 0;
+            for(let itemData of data){
+                data_component.push({
+                    name: itemData.name,
+                    type: itemData.type,
+                    isRequred: itemData.isRequired === false ? false : true,
+                    dragAble: itemData.draggable === false ? false : true
+                })
+                
+            }
+        }
     };
     // Menambahkan event listener pada checkbox "Check All Rows"
     document.getElementById('checkAllRows').addEventListener('change', function() {
@@ -281,20 +306,7 @@ function populateTableComponent(data) {
             checkbox.checked = this.checked;
         });
     });
-
-    function updateData(){
-        nameComponent.length = 0;
-        typeComponent.length = 0;
-        reqComponent.length = 0;
-        dragComponent.length = 0;
-        data.forEach(item => {
-            nameComponent.push({name: item.name_component})
-            typeComponent.push({type: item.type_component});
-            reqComponent.push({isRequred: item.required_component});
-            dragComponent.push({dragAble: item.dragable_component});
-
-        });
-    }
+    
 }
 
 // TABLE ACTION
@@ -328,9 +340,6 @@ function populateTableAction(data, data2) {
             selectRedirect.appendChild(optionRedirect);
         });
         redirectCell.appendChild(selectRedirect);
-        selectRedirect.addEventListener('change', function () {
-            console.log('Selected value:', this.value);
-        });
         // Adding select box for alert_prompt
         let selectAlert = document.createElement('select');
         selectAlert.setAttribute('name', 'page_redirect');
@@ -343,33 +352,25 @@ function populateTableAction(data, data2) {
             selectAlert.appendChild(optionAlert);
         });
         alertCell.appendChild(selectAlert);
-        selectAlert.addEventListener('change', function () {
-            console.log('Selected value:', this.value);
-        });
         // Adding check input
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.setAttribute('name', 'rowCheckbox');
         checkbox.setAttribute('value', item.id);
         checkboxCell.appendChild(checkbox);
-        // Add event listeners for input fields
+        // EVENT LISTENER INPUT DATA ACTION
         nameInput.addEventListener('input', function () {
             item.name_action = nameInput.value;
             updateData();
         });
-
-        // // Add event listeners for input fields
-        // inputRedirect.addEventListener('input', function () {
-        //     item.page_redirect = inputRedirect.value;
-        //     updateData();
-        // });
-
-        // inputAlert.addEventListener('input', function () {
-        //     item.alert_prompt = inputAlert.value;
-        //     updateData();
-        // });
-        
-
+        selectRedirect.addEventListener('change', function () {
+            item.page_redirect = selectRedirect.value;
+            updateData();
+        });
+        selectAlert.addEventListener('change', function () {
+            item.alert_prompt = selectAlert.value;
+            updateData();
+        });
     });
     // Menambahkan event listener pada checkbox "Check All Rows"
     document.getElementById('checkAllRowsAction').addEventListener('change', function() {
@@ -378,19 +379,16 @@ function populateTableAction(data, data2) {
             checkbox.checked = this.checked;
         });
     });
-
+    // UPDATE DATA ACTION
     function updateData(){
-        nameAction.length = 0;
-        alertPrompt.length = 0;
-        redirectData.length = 0;
+        data_action.length = 0;
         data.forEach(item => {
-            nameAction.push({name: item.name_action})
-            alertPrompt.push({alert: item.alert_prompt});
-            redirectData.push({redirect: item.page_redirect});
-
+            data_action.push({
+                name: item.name_action,
+                alert: item.alert_prompt,
+                redirect: item.page_redirect
+            })
         });
-        // console.log("teh",nameAction);
-        // console.log(redirectData);
     }
 }
 
@@ -401,7 +399,6 @@ function addSelectNodeButtonListener() {
     document.querySelectorAll('.selectNodeButton').forEach(button => {
         button.addEventListener('click', function(event) {
             const nodeIdToSelect = event.currentTarget.getAttribute('data-nodeid');
-            
             parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
         });
     });
@@ -436,6 +433,219 @@ function openTab(evt, tabName) {
     if (textElement && textElement.classList) {
         textElement.classList.add("active-text");
     }
+}
+
+
+// ADD COMPONENT
+function addRowToTableComponent() {
+    const tableBody = document.getElementById('tableComponent').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+    let searchIconCell = newRow.insertCell(0);
+    let nameCell = newRow.insertCell(1);
+    let typeCell = newRow.insertCell(2);
+    let requiredCell = newRow.insertCell(3);
+    let dragableCell = newRow.insertCell(4);
+    let checkboxCell = newRow.insertCell(5);
+
+    searchIconCell.innerHTML = '<button class="icon-button selectNodeButton"><div class="icon icon--search"></div></button>';
+    // Name Component Input
+    let nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.setAttribute('name', 'name_component');
+    nameInput.setAttribute('value', ''); 
+    nameCell.appendChild(nameInput);
+    nameInput.addEventListener('change', function () {
+        console.log('Name Component value:', this.value);
+        new_component = this.value
+    });
+    // Type Input
+    let typeInput = document.createElement('input');
+    typeInput.type = 'text';
+    typeInput.setAttribute('name', 'name_component');
+    typeInput.setAttribute('value', ''); 
+    typeCell.appendChild(typeInput);
+    typeInput.addEventListener('change', function () {
+        console.log('Type Component value:', this.value);
+    });
+    // Required Input
+    let requiredInput = document.createElement('input');
+    requiredInput.type = 'checkbox';
+    requiredInput.setAttribute('name', 'required_component');
+    requiredInput.setAttribute('value', 'true');  // Set a default value if needed
+    requiredCell.appendChild(requiredInput);
+    requiredInput.addEventListener('change', function () {
+        console.log('Required  value:', this.checked);
+    });
+    // Dragable Input
+    let dragableInput = document.createElement('input');
+    dragableInput.type = 'checkbox';
+    dragableInput.setAttribute('name', 'required_component');
+    dragableInput.setAttribute('value', 'true');  // Set a default value if needed
+    dragableCell.appendChild(dragableInput);
+    dragableInput.addEventListener('change', function () {
+        console.log('Dragable  value:', this.checked);
+    });
+
+    checkboxCell.innerHTML = '<input type="checkbox">';
+    
+    addSelectNodeButtonListener();
+}
+
+// ADD ACTION
+function addRowToTableAction() {
+    const tableBody = document.getElementById('tableAction').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+    let searchIconCell = newRow.insertCell(0);
+    let nameCell = newRow.insertCell(1);
+    let redirectCell = newRow.insertCell(2);
+    let alertCell = newRow.insertCell(3);
+    let checkboxCell = newRow.insertCell();
+
+    searchIconCell.innerHTML = '<button class="icon-button selectNodeButton"><div class="icon icon--search"></div></button>';
+
+    // Name Action Input
+    let nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.setAttribute('name', 'name_action');
+    nameInput.setAttribute('value', ''); 
+    nameCell.appendChild(nameInput);
+    nameInput.addEventListener('change', function () {
+        console.log('Name Action value:', this.value);
+        
+    });
+
+    // Redirect Input
+    let selectRedirect = document.createElement('input');
+    selectRedirect.type = 'text';
+    selectRedirect.setAttribute('name', 'page_redirect');
+    selectRedirect.setAttribute('value', ''); 
+    redirectCell.appendChild(selectRedirect);
+    selectRedirect.addEventListener('change', function () {
+        console.log('Redirect value:', this.value);
+    });
+
+    // Alert Input
+    let selectAlert = document.createElement('input');
+    selectAlert.type = 'text';
+    selectAlert.setAttribute('name', 'alert');
+    selectAlert.setAttribute('value', ''); 
+    alertCell.appendChild(selectAlert);
+
+    selectAlert.addEventListener('change', function () {
+        console.log('Alert value:', this.value);
+    });
+
+    let checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.setAttribute('name', 'rowCheckbox');
+    checkbox.setAttribute('value', item.id);
+    checkboxCell.appendChild(checkbox);
+    nameInput.addEventListener('input', function () {
+        item.name_action = nameInput.value;
+        updateData();
+    });
+}
+
+// ADD USER STORY
+let userStories = [];
+
+function addUserStory() {
+    
+    const tableBody = document.getElementById('userStoryTable').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+
+    // Sel Name
+    let nameCell = newRow.insertCell(0);
+
+    let nameInput = document.createElement('input');
+    nameInput.style.border = '1px solid gray'
+    nameInput.type = 'text';
+    nameInput.setAttribute('name', 'name_story');
+    nameInput.setAttribute('value', ''); 
+    nameCell.appendChild(nameInput);
+    nameInput.addEventListener('change', function () {
+        console.log('Name Story value:', this.value);
+        story_name = this.value
+    });
+
+    // Sel Message
+    let messageCell = newRow.insertCell(1);
+
+    let storyInput = document.createElement('textarea');
+    storyInput.style.width = '400px'; 
+    storyInput.style.height = '100px'; 
+    storyInput.style.border = '1px solid gray'
+
+    storyInput.setAttribute('name', 'story_message');
+    storyInput.setAttribute('value', ''); 
+    messageCell.appendChild(storyInput);
+    storyInput.addEventListener('change', function () {
+        console.log('Message Story value:', this.value);
+        story_message = this.value
+    });
+
+}
+
+// ADD TL MESSAGE
+function addTLMessage() {
+    const tableBody = document.getElementById('technicalLeadTable').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+    let messageCell = newRow.insertCell(0);
+
+    let tlMessage = document.createElement('textarea');
+    tlMessage.style.width = '400px'; 
+    tlMessage.style.height = '100px'; 
+    tlMessage.style.border = '1px solid gray'
+
+    tlMessage.setAttribute('name', 'tl_message');
+    tlMessage.setAttribute('value', ''); 
+    messageCell.appendChild(tlMessage);
+    tlMessage.addEventListener('change', function () {
+        console.log('Technical Message value:', this.value);
+        tl_message = this.value
+    });
+}
+
+// ADD BA COMMENT
+function addBAComment() {
+    const tableBody = document.getElementById('bisnisAnalysTable').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+    let messageCell = newRow.insertCell(0);
+
+    let baMessage = document.createElement('textarea');
+    baMessage.style.width = '400px'; 
+    baMessage.style.height = '100px'; 
+    baMessage.style.border = '1px solid gray'
+
+    baMessage.setAttribute('name', 'ba_comment');
+    baMessage.setAttribute('value', ''); 
+    messageCell.appendChild(baMessage);
+    baMessage.addEventListener('change', function () {
+        console.log('BA Message value:', this.value);
+        ba_comment = this.value
+    });
+}
+
+
+
+//FUNCTION GO SHOW CHANGE LOG 
+function showChangeLog() {
+    parent.postMessage({ pluginMessage: { type: 'showChangeLog' } }, '*');      
+}
+
+//FUNCTION SUBMIT DATA
+function submitData() {
+    parent.postMessage({ pluginMessage: { 
+        type: 'submitData', 
+        type_frame: selectedValue,
+        data_component: data_component,
+        data_action: data_action,
+        name_story: story_name,
+        message_story: story_message,
+        message_tech: tl_message,
+        ba_comment: ba_comment 
+    } }, '*');
+    // parent.postMessage({ pluginMessage: { type: 'postData' } }, '*');      
 }
 
 </script>
