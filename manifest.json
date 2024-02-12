@@ -11,7 +11,8 @@
   ],
   "ui": {
     "main": "main.html",
-    "view": "view.html"
+    "view": "view.html",
+    "changelog": "changelog.html"
   },
   "networkAccess": {
     "allowedDomains": [

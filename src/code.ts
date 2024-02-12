@@ -183,109 +183,68 @@ figma.ui.onmessage = async msg => {
   }
 
   if (msg.type === 'showChangeLog') {
-    figma.showUI(__uiFiles__.changeLog,{ width:700, height: 580, themeColors: false})
+    // figma.showUI(__uiFiles__.changeLog,{ width:700, height: 580, themeColors: false})
+    figma.showUI(__uiFiles__.changelog,{ width:700, height: 580, themeColors: false})
+
   }
   if (msg.type === 'backView') {
     figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
   }
-  if (msg.type === 'submitData') {
+  if (msg.type === 'submitDataButton') {
     console.log("type:", msg.type_frame)
     console.log("component:", msg.data_component)
     console.log("action:", msg.data_action)
-    console.log("story:", msg.name_story)
-    console.log("msg_story:", msg.message_story)
-    console.log("message_tech:", msg.message_tech)
-    console.log("ba_comment:", msg.ba_comment)
+    console.log("data story", msg.data_story)
+    console.log("data description:", msg.data_description)
+    let staticToken = "5D4py6Nsn21xsq4Vmer64RAe4y_c0A5w"
 
-    // let componentLength = populateResult.dataComponent.length;
-    // let actionLength = populateResult.dataAction.length;
+    await fetch(`${urlMigration}/figma_frame`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+          token: staticToken,
+          id: figma.fileKey+"::::"+selectedFrame.id,
+          file_key: figma.fileKey,
+          nodeId: selectedFrame.id,
+          name: selectedFrame.name,
+          type: msg.type_frame,
+          actionButton: {
+            update: msg.data_action, 
+            delete: [],
+            create: []
+          },
+          dataComponent: {
+            update: msg.data_component,
+            delete: [],
+            create: []
+          },
+          userStory: {
+            update: msg.data_story,
+            delete: [],
+            create: []
+          },
+          detailDescription: {
+            update: msg.data_description,
+            delete: [],
+            create: []
+          },
+          figmaComment: {
+            update: [],
+            delete: [],
+            create: []
+          },
+      }),
+    })
+    .then(response => response.json())
+    .then(res => {
+        console.log('DataSend:', res);
+    })
+    .catch(error => {
+        console.error('DataSend failed:', error);
+    });
 
-    // let dataComponentCreateArray:any[] = [];
-    // let createActionArray:any[] = [];
-    // let createUserStoryArray:any[] = [];
-    // let createTechnicalArray:any[] = [];
-    // let createBaCommentArray:any[] = [];
-
-    // for (let i = 0; i < componentLength; i++) {
-    //   dataComponentCreateArray.push({
-    //     name: msg.name_component[i].name ,
-    //     type: msg.type_component[i].type ,
-    //     isRequired: msg.req_component[i].isRequired ,
-    //     dragable: msg.drag_component[i].dragAble 
-    //   });
-    // }
-    // for (let i = 0; i < actionLength; i++) {
-    //   createActionArray.push({
-    //     name: msg.name_action[i].name ,
-    //     alert_prompt: msg.alert_prompt[i].alert ,
-    //     page_redirect: msg.page_redirect[i].redirect 
-    //   });
-    // }
-    //   createUserStoryArray.push({
-    //     roles: msg.name_story,
-    //     story: msg.message_story
-    //   });
-    //   createTechnicalArray.push({
-    //     type: "T",
-    //     description: msg.message_tech
-    //   });
-    //   createTechnicalArray.push({
-    //     type: "BA",
-    //     description: msg.ba_comment
-    //   });
-
-    // // console.log("component", dataComponentCreateArray)  
-    // // console.log("action", createActionArray)
-    // // console.log("userstory", createUserStoryArray)  
-    // // console.log("technical", createTechnicalArray)
-    // // console.log("bacomment", createTechnicalArray)
-
-    // fetch(`${urlMigration}/figma_frame`, {
-    //   method: 'POST',
-    //   headers: {
-    //       'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ 
-    //       token: token.data.access_token,
-    //       id: figma.fileKey+"::::"+selectedFrame.id,
-    //       file_key: figma.fileKey,
-    //       nodeId: valSelectedNode.id,
-    //       name: selectedFrame.name,
-    //       type: msg.type_frame,
-    //       actionButton: {
-    //         update: createActionArray,
-    //         delete: [],
-    //         create: []
-    //       },
-    //       dataComponent: {
-    //         update: dataComponentCreateArray,
-    //         delete: [],
-    //         create: []
-    //       },
-    //       userStory: {
-    //         update: createUserStoryArray,
-    //         delete: [],
-    //         create: []
-    //       },
-    //       detailDescription: {
-    //         update: createTechnicalArray,
-    //         delete: [],
-    //         create: []
-    //       },
-    //       figmaComment: {
-    //         update: [],
-    //         delete: [],
-    //         create: []
-    //       },
-    //   }),
-    // })
-    // .then(response => response.json())
-    // .then(res => {
-    //     console.log('DataSend:', res);
-    // })
-    // .catch(error => {
-    //     console.error('DataSend failed:', error);
-    // });
   }
  
 };
