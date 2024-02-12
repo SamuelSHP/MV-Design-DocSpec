@@ -165,23 +165,50 @@
         </div>
     </div>
 </div>
-
-<script src="path/to/figma-plugin-ds/figma-plugin-ds.js"></script>
 <script>
 
-let data_action = [];
-let data_component = [];
-let data_story = [];
-let data_description = [];
-let selectedValue
+// let data_action = [];
+// let data_component = [];
+// let data_story = [];
+// let data_description = [];
+// let selectedValue
+
+let data_group = {
+    type: '',
+    actionButton: {
+    update: [], 
+    delete: [],
+    create: []
+    },
+    dataComponent: {
+    update: [],
+    delete: [],
+    create: []
+    },
+    userStory: {
+    update: [],
+    delete: [],
+    create: []
+    },
+    detailDescription: {
+    update: [],
+    delete: [],
+    create: []
+    },
+    figmaComment: {
+    update: [],
+    delete: [],
+    create: []
+    },
+}
 
 
-let new_component = []
-let new_action = []
-let story_name = []
-let story_message = []
-let tl_message = []
-let ba_comment = []
+// let new_component = []
+// let new_action = []
+// let story_name = []
+// let story_message = []
+// let tl_message = []
+// let ba_comment = []
 
 
 // Function Analys Button 
@@ -195,13 +222,23 @@ document.getElementById('showDataButton').onclick = function() {
 // On Message From Figma
 onmessage = (event) => {
     const msg = event.data.pluginMessage;
+    
     if (msg.type === 'analysisResult') {
+        // data_group = msg.data.populateResult
+        // data_group.detailDescription = {
+        //     create : [...msg.data.populateResult?.tComment.create, ...msg.data.populateResult?.baComment.create],
+        //     update : [...msg.data.populateResult?.tComment.update, ...msg.data.populateResult?.baComment.update],
+        //     delete : [...msg.data.populateResult?.tComment.delete, ...msg.data.populateResult?.baComment.delete],   
+        // }
+        // console.log("TEST", data_group)
+
         displayResult(msg.data.resultAnalys);
-        populateTableComponent(msg.data.populateResult?.dataComponent);
-        populateTableAction(msg.data.populateResult?.dataAction, msg.data.dataGET);
-        populateTableStory(msg.data.populateResult?.userStory)
-        populateTableTL(msg.data.populateResult?.tComment)
-        populateTableBA(msg.data.populateResult?.baComment)
+        populateTableComponent([...msg.data.populateResult?.dataComponent.create,...msg.data.populateResult?.dataComponent.update]);
+        populateTableAction([...msg.data.populateResult?.dataAction.create,...msg.data.populateResult?.dataAction.update], msg.data.dataGET);
+        // populateTableStory([...msg.data.populateResult?.userStory.create,...msg.data.populateResult?.userStory.update])
+        // populateTableTL([...msg.data.populateResult?.tComment.create,...msg.data.populateResult?.tComment.update])
+        // populateTableBA([...msg.data.populateResult?.baComment.create,...msg.data.populateResult?.baComment.update])
+        // addRowToTableComponent()
     }
 };
 // TYPE DATA SELECT FUNCTION
@@ -215,8 +252,8 @@ dynamicOptions.forEach(function(optionValue) {
 });
 var typeFrameSelect = document.getElementById("typeFrame");
 typeFrameSelect.addEventListener("change", function () {
-    selectedValue = typeFrameSelect.value;
-    console.log("Selected Type:", selectedValue);
+    data_group.type = typeFrameSelect.value;
+    // console.log("Selected Type:", selectedValue);
 });
 
 // Function Display Frame
@@ -233,15 +270,15 @@ function displayResult(result) {
 function populateTableComponent(data) {
     const tableBody = document.getElementById('tableComponent').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
-
     data && data.forEach(item => {
+        console.log("TEST",item)
         let inputData = {
+            code: item.code,
             name: item.name,
             type: item.type,
-            isRequired: item.isRequired === undefined ? false : true,
-            draggable: item.draggable  === undefined ? false : true
-        };
-        
+            required: item.required,
+            dragable: item.dragable 
+        }; 
         let row = tableBody.insertRow();
         let searchIconCell = row.insertCell(0);
         let nameCell = row.insertCell(1);
@@ -278,21 +315,27 @@ function populateTableComponent(data) {
         let requiredInput = document.createElement('input');
         requiredInput.type = 'checkbox';
         requiredInput.setAttribute('name', 'required_component');
-        requiredInput.setAttribute('value', item.isRequired);  
+        requiredInput.setAttribute('value', item.required); 
+        if (item.required) {
+            requiredInput.checked = true;
+        } 
         requiredCell.appendChild(requiredInput);
         requiredInput.addEventListener('change', function () {
-            inputData.isRequired = this.checked;
+            inputData.required = this.checked;
         });
         // Dragable Input
         let dragableInput = document.createElement('input');
         dragableInput.type = 'checkbox';
         dragableInput.setAttribute('name', 'required_component');
-        dragableInput.setAttribute('value', item.draggable);  
+        dragableInput.setAttribute('value', item.dragable);  
+        if (item.dragable) {
+            dragableInput.checked = true;
+        } 
         dragableCell.appendChild(dragableInput);
         dragableInput.addEventListener('change', function () {
-            inputData.draggable = this.checked;
+            inputData.dragable = this.checked;
         });
-        // CHECKBOX
+        // CHECKBOX 
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.setAttribute('name', 'rowCheckbox');
@@ -301,7 +344,20 @@ function populateTableComponent(data) {
         nameInput.addEventListener('input', function () {
             // item.name_action = nameInput.value;
         });
-        data_component.push(inputData)
+
+        if(item.frame_id){
+            data_group.dataComponent.update.push({
+                id: item.id,
+                code: inputData.code,
+                type: inputData.type,
+                required: inputData.required,
+                dragable: inputData.dragable})
+            console.log("UPDATE")
+        } 
+        else{
+            // data_group.dataComponent.create.push(inputData)
+            console.log("CREATE")
+        }
     })
     
 
@@ -391,7 +447,8 @@ function populateTableAction(data, data2) {
             // item.name_action = nameInput.value;
         });
         // PUSH DATA ACTION
-        data_action.push(inputData)
+        // data_action.push(inputData)
+        // data_group.actionButton.update.push(inputData)
     })
 
     // Menambahkan event listener pada checkbox "Check All Rows"
@@ -410,6 +467,10 @@ function populateTableStory(data) {
     const tableBody = document.getElementById('userStoryTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
     data && data.forEach(item => {
+        let inputData = {
+            name: item.name,
+            message: item.message,
+        };
         let newRow = tableBody.insertRow();
         // cell Name
         let nameCell = newRow.insertCell(0);
@@ -420,8 +481,8 @@ function populateTableStory(data) {
         nameInput.setAttribute('value', ''); 
         nameCell.appendChild(nameInput);
         nameInput.addEventListener('change', function () {
-            item.story_name = nameInput.value
-            updateData();
+            inputData.name = this.value
+            // updateData();
         });
         // cell Message
         let messageCell = newRow.insertCell(1);
@@ -433,20 +494,20 @@ function populateTableStory(data) {
         storyInput.setAttribute('value', ''); 
         messageCell.appendChild(storyInput);
         storyInput.addEventListener('change', function () {
-            item.story_message = storyInput.value
-            updateData();
+            inputData.message = this.value
+            // updateData();
         });
-
+        // data_group.actionButton.update.push(inputData)
         // UPDATE DATA Story
-        function updateData(){
-            data_story.length = 0;
-            for(let itemData of data){
-                data_story.push({
-                    name: itemData.story_name,
-                    message: itemData.story_message,
-                })
-            }
-        }
+        // function updateData(){
+        //     data_story.length = 0;
+        //     for(let itemData of data){
+        //         data_story.push({
+        //             name: itemData.story_name,
+        //             message: itemData.story_message,
+        //         })
+        //     }
+        // }
 
     })
 }
@@ -556,6 +617,7 @@ function openTab(evt, tabName) {
     }
 }
 
+
 // ADD COMPONENT
 function addRowToTableComponent() {
     const tableBody = document.getElementById('tableComponent').getElementsByTagName('tbody')[0];
@@ -609,7 +671,8 @@ function addRowToTableComponent() {
     dragableInput.addEventListener('change', function () {
         inputData.draggable = this.checked;
     });
-    data_component.push(inputData); 
+    // data_component.push(inputData);
+    data_group.dataComponent.create.push(inputData) 
 
     let checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -663,7 +726,8 @@ function addRowToTableAction() {
         inputData.alert = this.value;
     });
 
-    data_action.push(inputData);
+    // data_action.push(inputData);
+    data_group.actionButton.create.push(inputData) 
 
     let checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -705,7 +769,8 @@ function addUserStory() {
     storyInput.addEventListener('change', function () {
         inputData.message = this.value;
     });
-    data_story.push(inputData);
+    // data_story.push(inputData);
+    data_group.userStory.create.push(inputData) 
 }
 // ADD TL MESSAGE
 function addTLMessage() {
@@ -727,7 +792,8 @@ function addTLMessage() {
     tlMessage.addEventListener('change', function () {
         inputData.message = this.value;
     });
-    data_description.push(inputData);
+    // data_description.push(inputData);
+    data_group.detailDescription.create.push(inputData) 
 }
 // ADD BA COMMENT
 function addBAComment() {
@@ -749,7 +815,8 @@ function addBAComment() {
     baMessage.addEventListener('change', function () {
         inputData.message = this.value;
     });
-    data_description.push(inputData);
+    // data_description.push(inputData);
+    data_group.detailDescription.create.push(inputData) 
 }
 
 
@@ -762,11 +829,12 @@ document.getElementById('changeLog').onclick = function() {
 function submitData() {
     parent.postMessage({ pluginMessage: { 
         type: 'submitDataButton', 
-        type_frame: selectedValue,
-        data_component: data_component,
-        data_action: data_action,
-        data_story: data_story,
-        data_description: data_description,
+        // type_frame: selectedValue,
+        // data_component: data_component,
+        // data_action: data_action,
+        // data_story: data_story,
+        // data_description: data_description,
+        data_group: data_group
     } }, '*');
 }
 

@@ -4,7 +4,7 @@ import * as cell from "./components/table";
 
 interface ComponentData {
     id: string;
-    refinedID: string | null;
+    code: string | null;
     name : string;
     type: string | any;
     required?: boolean;
@@ -18,7 +18,7 @@ interface ComponentData {
 // }
 export let componentData: ComponentData = {
     id: "",
-    refinedID: "",
+    code: "",
     name : "",
     type: "",
 }
@@ -29,7 +29,7 @@ export function setComponentData(componentID: string): Object {
 
     let _componentNode = componentNode(componentID);
     componentData.id = componentID;
-    componentData.refinedID = (componentID.split(";").length > 1 ) ? componentID.split(";")[1] : componentID.split(";")[0];
+    componentData.code = (componentID.split(";").length > 1 ) ? componentID.split(";")[1] : componentID.split(";")[0];
     
     switch (setName) {
 

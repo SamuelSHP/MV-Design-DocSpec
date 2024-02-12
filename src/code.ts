@@ -134,7 +134,7 @@ figma.ui.onmessage = async msg => {
         let frameData = JSON.parse(syncData);
         let fileKeyData = figma.fileKey
         // let dataToken = token.data.access_token
-        let staticToken = "5D4py6Nsn21xsq4Vmer64RAe4y_c0A5w"
+        const staticToken = "tZUjr2tRUjEZHdYhEMOCWQypanPTcfKH"
         await fetch(`${urlMigration}/figma_frame?name=${selectedFrame.name}&frame_id=${selectedFrame.id}&file_key=${fileKeyData}&token=${staticToken}`, {
           method: 'GET',
           headers: {
@@ -169,7 +169,7 @@ figma.ui.onmessage = async msg => {
              dataDescription: getDataDescription, resultDataDescription, 
           }
       
-          console.log("Act", populateResult)
+          console.log("Comp", populateResult.dataComponent)
           
           figma.ui.postMessage({ type: 'analysisResult', data: {dataGET: data, resultAnalys: frameData, populateResult} });
         })
@@ -191,12 +191,12 @@ figma.ui.onmessage = async msg => {
     figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
   }
   if (msg.type === 'submitDataButton') {
-    console.log("type:", msg.type_frame)
-    console.log("component:", msg.data_component)
-    console.log("action:", msg.data_action)
-    console.log("data story", msg.data_story)
-    console.log("data description:", msg.data_description)
-    let staticToken = "5D4py6Nsn21xsq4Vmer64RAe4y_c0A5w"
+    console.log("data:", msg.data_group)
+    // console.log("component:", msg.data_component)
+    // console.log("action:", msg.data_action)
+    // console.log("data story", msg.data_story)
+    // console.log("data description:", msg.data_description)
+    const staticToken = "tZUjr2tRUjEZHdYhEMOCWQypanPTcfKH"
 
     await fetch(`${urlMigration}/figma_frame`, {
       method: 'POST',
@@ -209,32 +209,12 @@ figma.ui.onmessage = async msg => {
           file_key: figma.fileKey,
           nodeId: selectedFrame.id,
           name: selectedFrame.name,
-          type: msg.type_frame,
-          actionButton: {
-            update: msg.data_action, 
-            delete: [],
-            create: []
-          },
-          dataComponent: {
-            update: msg.data_component,
-            delete: [],
-            create: []
-          },
-          userStory: {
-            update: msg.data_story,
-            delete: [],
-            create: []
-          },
-          detailDescription: {
-            update: msg.data_description,
-            delete: [],
-            create: []
-          },
-          figmaComment: {
-            update: [],
-            delete: [],
-            create: []
-          },
+          type: msg.data_group.type,
+          actionButton: msg.data_group.actionButton,
+          dataComponent: msg.data_group.dataComponent,
+          userStory: msg.data_group.userStory,
+          detailDescription: msg.data_group.detailDescription,
+          figmaComment: msg.data_group.figmaComment,
       }),
     })
     .then(response => response.json())
@@ -251,20 +231,29 @@ figma.ui.onmessage = async msg => {
 
 
 function loopDataGetNew(data1: any[], data2: { filter: (arg0: (item: any) => boolean) => { (): any; new(): any; length: number; }; map: (arg0: (itemRes: any) => void) => void; }){
-  let newData: any[] = []    
-  data1.map((itemGET: { id: any; }) => {
-          if(data2.filter((item: { id: any; })=>item.id === itemGET.id).length > 0){
-              newData.push(itemGET)
+  let newDataToPatch: any[] = []  
+  let newDataToCreate: any[] = []  
+  let newDataToDelete: any[] = []   
+  let newData: any = {}  
+  data1.map((itemGET) => {
+          if(data2.filter((item)=>item.code === itemGET.code).length > 0){
+              newDataToPatch.push(itemGET)
           }
       })
-      data2.map((itemRes: { id: any; }) => {
-          if(newData.filter((item: { id: any; })=>item.id !== itemRes.id)){
-              newData.push(itemRes)
+      data2.map((itemRes) => {
+          if(newDataToPatch.filter((item)=>item.code !== itemRes.code)){
+              newDataToCreate.push(itemRes)
           }
           else{
+            newDataToDelete.push(itemRes)
               console.log("delete")
           }
       })
+      newData = {
+        update: newDataToPatch,
+        create: newDataToCreate,
+        delete: newDataToDelete,
+      }
       return newData
 }
 
@@ -376,12 +365,12 @@ function setComponentGroup(): Object | undefined {
 
         // Check if an object with the same name and type already exists
         controller.setComponentData(id);
-        let existingComponent = componentGroup.component.find((comp: { id: any; refinedID: any; name: any; type: any; }) =>  comp.refinedID === controller.componentData.refinedID || (comp.name == controller.componentData.name && comp.type == controller.componentData.type));
+        let existingComponent = componentGroup.component.find((comp: { id: any; code: any; name: any; type: any; }) =>  comp.code === controller.componentData.code || (comp.name == controller.componentData.name && comp.type == controller.componentData.type));
 
         if(!existingComponent){
           componentGroup.component.push({
             id: controller.componentData.id,
-            refinedID: controller.componentData.refinedID,
+            code: controller.componentData.code,
             name: controller.componentData.name,
             type: controller.componentData.type,
             isRequired: controller.componentData.required,
@@ -402,12 +391,12 @@ function setComponentGroup(): Object | undefined {
         
         controller.setComponentData(id);
         // Check if an object with the same name and type already exists
-        let existingComponent = componentGroup.action.find((comp: {id: any; refinedID: any; name: any;}) => comp.refinedID === controller.componentData.refinedID);
+        let existingComponent = componentGroup.action.find((comp: {id: any; code: any; name: any;}) => comp.code === controller.componentData.code);
 
         if(!existingComponent){
           componentGroup.action.push({
             id: controller.componentData.id,
-            refinedID: controller.componentData.refinedID,
+            code: controller.componentData.code,
             name: controller.componentData.name,
             page_redirect: controller.componentData.page_redirect,
             alert_prompt: controller.componentData.alert_prompt,
