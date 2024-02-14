@@ -203,8 +203,8 @@ onmessage = (event) => {
         //     update : [...msg.data.populateResult?.tComment.update, ...msg.data.populateResult?.baComment.update],
         //     delete : [...msg.data.populateResult?.tComment.delete, ...msg.data.populateResult?.baComment.delete],   
         // }
-        // console.log("TEST", msg.data.populateResult?.dataComponent)
-        typeSelectData(msg.data.dataGET)
+        // console.log("TEST", msg.data.populateResult?.dataAction)
+        typeSelectData(msg.data.dataGET) 
         displayResult(msg.data.resultAnalys);
         populateTableComponent(msg.data.populateResult?.dataComponent);
         populateTableAction(msg.data.populateResult?.dataAction, msg.data.dataGET);
@@ -246,9 +246,9 @@ function populateTableComponent(data) {
     const tableBody = document.getElementById('tableComponent').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
 
-    const processData = (item, update) => {
+    const processData = (item, update, isUpdate) => {
         const inputData = {
-            id: item.id,
+            id: isUpdate ? item.id : null,
             code: item.code,
             name: item.name,
             type: item.type,
@@ -314,8 +314,9 @@ function populateTableComponent(data) {
         update.push(inputData);
     };
 
-    data.update.length > 0 ? data.update.forEach(item => processData(item, data_group.dataComponent.update)) :
-                            data.create.forEach(item => processData(item, data_group.dataComponent.create));
+    data.update.length > 0 ? data.update.forEach(item => processData(item, data_group.dataComponent.update, true)) :
+                            data.create.forEach(item => processData(item, data_group.dataComponent.create, false));
+
 }
 
 
@@ -324,9 +325,10 @@ function populateTableAction(data, data2) {
     const tableBody = document.getElementById('tableAction').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
 
-    const processData = (item, update) => {
+    const processData = (item, update, isUpdate) => {
         const inputData = {
-            id: item.id,
+            id: isUpdate ? item.id : null,
+            code: item.code,
             name: item.name,
             page_redirect: item.page_redirect,
             alert_prompt: item.alert_prompt
@@ -357,24 +359,41 @@ function populateTableAction(data, data2) {
         // Adding select box for page_redirect
         let selectRedirect = document.createElement('select');
         selectRedirect.setAttribute('name', 'page_redirect');
-        selectRedirect.setAttribute('value', item.page_redirect); 
+        selectRedirect.setAttribute('value', item.page_redirect);
+
+        // Add default null option
+        let defaultOption = document.createElement('option');
+        defaultOption.value = null;
+        defaultOption.text = 'Select an option';
+        selectRedirect.appendChild(defaultOption);
+
         var dynamicOptions = data2.parent_id?.childs;
         let optionRedirect;
+
         dynamicOptions.map(item => {
             optionRedirect = document.createElement('option');
             optionRedirect.value = item.id;
             optionRedirect.text = item.name;
             selectRedirect.appendChild(optionRedirect);
         });
+
         redirectCell.appendChild(selectRedirect);
+
         selectRedirect.addEventListener('change', function () {
             inputData.page_redirect = this.value;
         });
 
-        // Adding select box for alert_prompt
+       // Adding select box for alert_prompt
         let selectAlert = document.createElement('select');
         selectAlert.setAttribute('name', 'alert_prompt');
-        selectAlert.setAttribute('value', item.alert_prompt); 
+        selectAlert.setAttribute('value', item.alert_prompt);
+
+        // Add default null option
+        let defaultOptionAlert = document.createElement('option');
+        defaultOptionAlert.value = null;
+        defaultOptionAlert.text = 'Select an option';
+        selectAlert.appendChild(defaultOptionAlert);
+
         let optionAlert;
         dynamicOptions.map(item => {
             optionAlert = document.createElement('option');
@@ -382,16 +401,19 @@ function populateTableAction(data, data2) {
             optionAlert.text = item.name;
             selectAlert.appendChild(optionAlert);
         });
+
         alertCell.appendChild(selectAlert);
+
         selectAlert.addEventListener('change', function () {
             inputData.alert_prompt = this.value;
         });
 
+
         update.push(inputData);
     };
 
-    data.update.length > 0 ? data.update.forEach(item => processData(item, data_group.dataAction.update)) :
-                            data.create.forEach(item => processData(item, data_group.dataAction.create));
+    data.update.length > 0 ? data.update.forEach(item => processData(item, data_group.actionButton.update, true)) :
+                            data.create.forEach(item => processData(item, data_group.actionButton.create, false));
 }
 
 
@@ -722,7 +744,6 @@ function submitData() {
         type: 'submitDataButton', 
         data_group: data_group
     } }, '*');
-    
 }
 
 </script>

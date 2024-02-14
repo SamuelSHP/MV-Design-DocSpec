@@ -161,7 +161,7 @@ figma.ui.onmessage = async msg => {
              dataTLComment: getDataTLComment,
              dataBAComment: getDataBAComment
           }
-          console.log("Comp", dataGET)
+          console.log("Comp", populateResult)
           
           figma.ui.postMessage({ type: 'analysisResult', data: {dataGET: data, resultAnalys: frameData, populateResult} });
         })
@@ -185,7 +185,7 @@ figma.ui.onmessage = async msg => {
   if (msg.type === 'submitDataButton') {
     const staticToken = "tZUjr2tRUjEZHdYhEMOCWQypanPTcfKH";
     const endpoint = `${urlMigration}/figma_frame`;
-    const requestData = {
+    let requestData: any = {
       token: staticToken,
       id: `${figma.fileKey}::::${selectedFrame.id}`,
       file_key: figma.fileKey,
@@ -208,9 +208,10 @@ figma.ui.onmessage = async msg => {
       });
       const res:any = await response.json();
       console.log('DataSend:', res);
-      figma.notify('Data submitted successfully!');
-
       msg.data_group = null;
+      requestData = null
+      figma.notify('Data submitted successfully!');
+      
     } catch (error) {
       console.error('DataSend failed:', error);
       figma.notify('Submission failed. Please try again.');
@@ -234,6 +235,8 @@ function loopDataGetNew(data1: any[], data2: { filter: (arg0: (item: any) => boo
 
   return newData;
 }
+
+
 
 
 function selectNodeById(nodeId: string): void {
