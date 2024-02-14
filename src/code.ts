@@ -206,11 +206,15 @@ figma.ui.onmessage = async msg => {
         },
         body: JSON.stringify(requestData),
       });
-      const res = await response.json();
+      const res:any = await response.json();
       console.log('DataSend:', res);
+      figma.notify('Data submitted successfully!');
+
       msg.data_group = null;
     } catch (error) {
       console.error('DataSend failed:', error);
+      figma.notify('Submission failed. Please try again.');
+
     }
   }
  
