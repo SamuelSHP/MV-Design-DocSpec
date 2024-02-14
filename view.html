@@ -78,9 +78,9 @@
                             <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
                                 <tr>
                                     <td>&nbsp;</td><td>Name</td><td>Type</td><td>Required</td><td>Dragable</td>
-                                    <td>
+                                    <!-- <td>
                                         <input id="checkAllRows" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                    </td>
+                                    </td> -->
                                 </tr>
                             </thead>
                             <tbody class="p-2"></tbody>
@@ -101,9 +101,9 @@
                             <thead class="text-xs text-blue-700  bg-blue-200 font-bold p-2">
                                 <tr>
                                     <td>&nbsp;</td><td>Name</td><td>Redirect</td><td>Alert Prompt</td>
-                                    <td>
+                                    <!-- <td>
                                         <input id="checkAllRowsAction" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                    </td>
+                                    </td> -->
                                 </tr>
                             </thead>
                             <tbody class="p-2"></tbody>
@@ -167,49 +167,22 @@
 </div>
 <script>
 
-// let data_action = [];
-// let data_component = [];
-// let data_story = [];
-// let data_description = [];
-// let selectedValue
-
 let data_group = {
     type: '',
-    actionButton: {
-    update: [], 
-    delete: [],
-    create: []
-    },
-    dataComponent: {
-    update: [],
-    delete: [],
-    create: []
-    },
-    userStory: {
-    update: [],
-    delete: [],
-    create: []
-    },
-    detailDescription: {
-    update: [],
-    delete: [],
-    create: []
-    },
-    figmaComment: {
-    update: [],
-    delete: [],
-    create: []
-    },
+    actionButton: createEmptyObject(),
+    dataComponent: createEmptyObject(),
+    userStory: createEmptyObject(),
+    detailDescription: createEmptyObject(),
+    figmaComment: createEmptyObject(),
+};
+
+function createEmptyObject() {
+    return {
+        update: [],
+        delete: [],
+        create: [],
+    };
 }
-
-
-// let new_component = []
-// let new_action = []
-// let story_name = []
-// let story_message = []
-// let tl_message = []
-// let ba_comment = []
-
 
 // Function Analys Button 
 document.getElementById('analyzeButton').onclick = function() {
@@ -230,31 +203,33 @@ onmessage = (event) => {
         //     update : [...msg.data.populateResult?.tComment.update, ...msg.data.populateResult?.baComment.update],
         //     delete : [...msg.data.populateResult?.tComment.delete, ...msg.data.populateResult?.baComment.delete],   
         // }
-        // console.log("TEST", data_group)
-
+        // console.log("TEST", msg.data.populateResult?.dataComponent)
+        typeSelectData(msg.data.dataGET)
         displayResult(msg.data.resultAnalys);
-        populateTableComponent([...msg.data.populateResult?.dataComponent.create,...msg.data.populateResult?.dataComponent.update]);
-        populateTableAction([...msg.data.populateResult?.dataAction.create,...msg.data.populateResult?.dataAction.update], msg.data.dataGET);
-        // populateTableStory([...msg.data.populateResult?.userStory.create,...msg.data.populateResult?.userStory.update])
-        // populateTableTL([...msg.data.populateResult?.tComment.create,...msg.data.populateResult?.tComment.update])
-        // populateTableBA([...msg.data.populateResult?.baComment.create,...msg.data.populateResult?.baComment.update])
-        // addRowToTableComponent()
+        populateTableComponent(msg.data.populateResult?.dataComponent);
+        populateTableAction(msg.data.populateResult?.dataAction, msg.data.dataGET);
+        populateTableStory(msg.data.populateResult?.dataUserStory)
+        populateTableTL(msg.data.populateResult?.dataTLComment)
+        populateTableBA(msg.data.populateResult?.dataBAComment)
     }
 };
 // TYPE DATA SELECT FUNCTION
-var dynamicOptions = ['FRAME', 'DROPDOWN', 'MODAL', 'NOTIFICATION'];
-var selectDropdown = document.getElementById('typeFrame');
-dynamicOptions.forEach(function(optionValue) {
-    var option = document.createElement('option');
-    option.value = optionValue;
-    option.text = optionValue;
-    selectDropdown.add(option);
-});
-var typeFrameSelect = document.getElementById("typeFrame");
-typeFrameSelect.addEventListener("change", function () {
-    data_group.type = typeFrameSelect.value;
-    // console.log("Selected Type:", selectedValue);
-});
+function typeSelectData(data_group) {
+    const dynamicOptions = ['FRAME', 'DROPDOWN', 'MODAL', 'NOTIFICATION'];
+    const selectDropdown = document.getElementById('typeFrame');
+    selectDropdown.innerHTML = '';
+    dynamicOptions.forEach(optionValue => {
+        const option = new Option(optionValue, optionValue);
+        selectDropdown.add(option);
+    });
+    if (data_group.type && dynamicOptions.includes(data_group.type)) {
+        selectDropdown.value = data_group.type;
+    }
+    selectDropdown.addEventListener('change', function () {
+        data_group.type = selectDropdown.value;
+    });
+}
+
 
 // Function Display Frame
 function displayResult(result) {
@@ -270,22 +245,23 @@ function displayResult(result) {
 function populateTableComponent(data) {
     const tableBody = document.getElementById('tableComponent').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
-    data && data.forEach(item => {
-        console.log("TEST",item)
-        let inputData = {
+
+    const processData = (item, update) => {
+        const inputData = {
+            id: item.id,
             code: item.code,
             name: item.name,
             type: item.type,
             required: item.required,
             dragable: item.dragable 
-        }; 
+        };
+
         let row = tableBody.insertRow();
         let searchIconCell = row.insertCell(0);
         let nameCell = row.insertCell(1);
         let typeCell = row.insertCell(2);
         let requiredCell = row.insertCell(3);
         let dragableCell = row.insertCell(4);
-        let checkboxCell = row.insertCell(5);
 
         searchIconCell.innerHTML = `
             <button class="icon-button selectNodeButton" data-nodeid="${item.id}">
@@ -302,6 +278,7 @@ function populateTableComponent(data) {
         nameInput.addEventListener('change', function () {
             inputData.name = this.value;
         });
+
         // TYPE Input
         let typeInput = document.createElement('input');
         typeInput.type = 'text';
@@ -311,73 +288,45 @@ function populateTableComponent(data) {
         typeInput.addEventListener('change', function () {
             inputData.type = this.value;
         });
+
         // Required Input
         let requiredInput = document.createElement('input');
         requiredInput.type = 'checkbox';
         requiredInput.setAttribute('name', 'required_component');
         requiredInput.setAttribute('value', item.required); 
-        if (item.required) {
-            requiredInput.checked = true;
-        } 
+        requiredInput.checked = item.required;
         requiredCell.appendChild(requiredInput);
         requiredInput.addEventListener('change', function () {
             inputData.required = this.checked;
         });
+
         // Dragable Input
         let dragableInput = document.createElement('input');
         dragableInput.type = 'checkbox';
         dragableInput.setAttribute('name', 'required_component');
         dragableInput.setAttribute('value', item.dragable);  
-        if (item.dragable) {
-            dragableInput.checked = true;
-        } 
+        dragableInput.checked = item.dragable;
         dragableCell.appendChild(dragableInput);
         dragableInput.addEventListener('change', function () {
             inputData.dragable = this.checked;
         });
-        // CHECKBOX 
-        let checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.setAttribute('name', 'rowCheckbox');
-        checkbox.setAttribute('value', item.id);
-        checkboxCell.appendChild(checkbox);
-        nameInput.addEventListener('input', function () {
-            // item.name_action = nameInput.value;
-        });
 
-        if(item.frame_id){
-            data_group.dataComponent.update.push({
-                id: item.id,
-                code: inputData.code,
-                type: inputData.type,
-                required: inputData.required,
-                dragable: inputData.dragable})
-            console.log("UPDATE")
-        } 
-        else{
-            // data_group.dataComponent.create.push(inputData)
-            console.log("CREATE")
-        }
-    })
-    
+        update.push(inputData);
+    };
 
-    // Menambahkan event listener pada checkbox "Check All Rows"
-    document.getElementById('checkAllRows').addEventListener('change', function () {
-        const checkboxes = document.getElementsByName('rowCheckbox');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-        });
-    });
-    
+    data.update.length > 0 ? data.update.forEach(item => processData(item, data_group.dataComponent.update)) :
+                            data.create.forEach(item => processData(item, data_group.dataComponent.create));
 }
+
 
 // TABLE ACTION
 function populateTableAction(data, data2) {
     const tableBody = document.getElementById('tableAction').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
 
-    data && data.forEach(item => {
-        let inputData = {
+    const processData = (item, update) => {
+        const inputData = {
+            id: item.id,
             name: item.name,
             page_redirect: item.page_redirect,
             alert_prompt: item.alert_prompt
@@ -388,7 +337,6 @@ function populateTableAction(data, data2) {
         let nameCell = row.insertCell(1);
         let redirectCell = row.insertCell(2);
         let alertCell = row.insertCell(3);
-        let checkboxCell = row.insertCell(4);
 
         searchIconCell.innerHTML = `
             <button class="icon-button selectNodeButton" data-nodeid="${item.id}">
@@ -396,7 +344,7 @@ function populateTableAction(data, data2) {
             </button>
         `;
 
-        //  Name Input
+        // Name Input
         let nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.setAttribute('name', 'name_component');
@@ -405,6 +353,7 @@ function populateTableAction(data, data2) {
         nameInput.addEventListener('change', function () {
             inputData.name = this.value;
         });
+
         // Adding select box for page_redirect
         let selectRedirect = document.createElement('select');
         selectRedirect.setAttribute('name', 'page_redirect');
@@ -421,11 +370,11 @@ function populateTableAction(data, data2) {
         selectRedirect.addEventListener('change', function () {
             inputData.page_redirect = this.value;
         });
+
         // Adding select box for alert_prompt
         let selectAlert = document.createElement('select');
         selectAlert.setAttribute('name', 'alert_prompt');
         selectAlert.setAttribute('value', item.alert_prompt); 
-        var dynamicOptions = data2.parent_id?.childs;
         let optionAlert;
         dynamicOptions.map(item => {
             optionAlert = document.createElement('option');
@@ -437,29 +386,14 @@ function populateTableAction(data, data2) {
         selectAlert.addEventListener('change', function () {
             inputData.alert_prompt = this.value;
         });
-        // CHECKBOX
-        let checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.setAttribute('name', 'rowCheckbox');
-        checkbox.setAttribute('value', item.id);
-        checkboxCell.appendChild(checkbox);
-        nameInput.addEventListener('input', function () {
-            // item.name_action = nameInput.value;
-        });
-        // PUSH DATA ACTION
-        // data_action.push(inputData)
-        // data_group.actionButton.update.push(inputData)
-    })
 
-    // Menambahkan event listener pada checkbox "Check All Rows"
-    document.getElementById('checkAllRowsAction').addEventListener('change', function() {
-        const checkboxes = document.getElementsByName('rowCheckbox');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-        });
-    });
-    
+        update.push(inputData);
+    };
+
+    data.update.length > 0 ? data.update.forEach(item => processData(item, data_group.dataAction.update)) :
+                            data.create.forEach(item => processData(item, data_group.dataAction.create));
 }
+
 
 
 // TABLE Story
@@ -467,49 +401,59 @@ function populateTableStory(data) {
     const tableBody = document.getElementById('userStoryTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
     data && data.forEach(item => {
-        let inputData = {
-            name: item.name,
-            message: item.message,
-        };
+        let inputData = { id: item.id, roles: item.roles, story: item.story };
         let newRow = tableBody.insertRow();
-        // cell Name
         let nameCell = newRow.insertCell(0);
         let nameInput = document.createElement('input');
         nameInput.style.border = '1px solid gray'
+        nameInput.style.width = '100px'; 
         nameInput.type = 'text';
         nameInput.setAttribute('name', 'name_story');
-        nameInput.setAttribute('value', ''); 
+        nameInput.setAttribute('value', item.roles); 
         nameCell.appendChild(nameInput);
         nameInput.addEventListener('change', function () {
-            inputData.name = this.value
-            // updateData();
+            inputData.roles = this.value
         });
-        // cell Message
         let messageCell = newRow.insertCell(1);
-        let storyInput = document.createElement('textarea');
-        storyInput.style.width = '400px'; 
-        storyInput.style.height = '100px'; 
+        let storyInput = document.createElement('input');
+        storyInput.style.width = '500px'; 
         storyInput.style.border = '1px solid gray'
         storyInput.setAttribute('name', 'story_message');
-        storyInput.setAttribute('value', ''); 
+        storyInput.setAttribute('value', item.story); 
         messageCell.appendChild(storyInput);
         storyInput.addEventListener('change', function () {
-            inputData.message = this.value
-            // updateData();
+            inputData.story = this.value
         });
-        // data_group.actionButton.update.push(inputData)
-        // UPDATE DATA Story
-        // function updateData(){
-        //     data_story.length = 0;
-        //     for(let itemData of data){
-        //         data_story.push({
-        //             name: itemData.story_name,
-        //             message: itemData.story_message,
-        //         })
-        //     }
-        // }
-
+        data_group.userStory.update.push(inputData)
     })
+}
+// ADD USER STORY
+function addUserStory() {
+    const tableBody = document.getElementById('userStoryTable').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+    let inputData = { roles: '', story: '' };
+    let nameCell = newRow.insertCell(0);
+    let nameInput = document.createElement('input');
+    nameInput.style.border = '1px solid gray'
+    nameInput.style.width = '100px'; 
+    nameInput.type = 'text';
+    nameInput.setAttribute('name', 'name_story');
+    nameInput.setAttribute('value', ''); 
+    nameCell.appendChild(nameInput);
+    nameInput.addEventListener('change', function () {
+        inputData.roles = this.value
+    });
+    let messageCell = newRow.insertCell(1);
+    let storyInput = document.createElement('input');
+    storyInput.style.width = '500px'; 
+    storyInput.style.border = '1px solid gray'
+    storyInput.setAttribute('name', 'story_message');
+    storyInput.setAttribute('value', ''); 
+    messageCell.appendChild(storyInput);
+    storyInput.addEventListener('change', function () {
+        inputData.story = this.value
+    });
+    data_group.userStory.create.push(inputData);
 }
 
 // TABLE TL
@@ -517,31 +461,41 @@ function populateTableTL(data) {
     const tableBody = document.getElementById('technicalLeadTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
     data && data.forEach(item => {
+        let inputData = { id: item.id, description: item.description };
         let newRow = tableBody.insertRow();
-        // cell Message
         let messageCell = newRow.insertCell(0);
-        let tlInput = document.createElement('textarea');
-        tlInput.style.width = '400px'; 
-        tlInput.style.height = '100px'; 
+        let tlInput = document.createElement('input');
+        tlInput.style.width = '600px'; 
         tlInput.style.border = '1px solid gray'
         tlInput.setAttribute('name', 'message');
-        tlInput.setAttribute('value', item.message); 
+        tlInput.setAttribute('value', item.description); 
         messageCell.appendChild(tlInput);
         tlInput.addEventListener('change', function () {
-            item.message = tlInput.value
-            updateData();
+            inputData.description = tlInput.value
         });
-
-        // UPDATE DATA TL
-        function updateData(){
-            data_description.length = 0;
-            for(let itemData of data){
-                data_description.push({
-                    message: itemData.message,
-                })
-            }
-        }
+        data_group.detailDescription.update.push(inputData);
     })
+}
+// ADD TL MESSAGE
+function addTLMessage() {
+    const tableBody = document.getElementById('technicalLeadTable').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+    let inputData = {
+        type: 'T',
+        description: ''
+    };
+    // Sel Message
+    let messageCell = newRow.insertCell(0);
+    let tlMessage = document.createElement('input');
+    tlMessage.style.width = '600px'; 
+    tlMessage.style.border = '1px solid gray'
+    tlMessage.setAttribute('name', 'tl_message');
+    tlMessage.setAttribute('value', ''); 
+    messageCell.appendChild(tlMessage);
+    tlMessage.addEventListener('change', function () {
+        inputData.description = this.value;
+    });
+    data_group.detailDescription.create.push(inputData) 
 }
 
 // TABLE BA
@@ -549,31 +503,43 @@ function populateTableBA(data) {
     const tableBody = document.getElementById('bisnisAnalysTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
     data && data.forEach(item => {
+        let inputData = { id: item.id, description: item.description };
         let newRow = tableBody.insertRow();
-        // cell Message
         let messageCell = newRow.insertCell(0);
-        let baInput = document.createElement('textarea');
-        baInput.style.width = '400px'; 
-        baInput.style.height = '100px'; 
+        let baInput = document.createElement('input');
+        baInput.style.width = '600px'; 
         baInput.style.border = '1px solid gray'
         baInput.setAttribute('name', 'message');
-        baInput.setAttribute('value', item.message); 
+        baInput.setAttribute('value', item.description); 
         messageCell.appendChild(baInput);
         baInput.addEventListener('change', function () {
-            item.message = baInput.value
-            updateData();
+            inputData.description = baInput.value
         });
-
-        // UPDATE DATA BA
-        function updateData(){
-            data_description.length = 0;
-            for(let itemData of data){
-                data_description.push({
-                    message: itemData.message,
-                })
-            }
-        }
+        data_group.detailDescription.update.push(inputData);
     })
+}
+
+
+// ADD BA COMMENT
+function addBAComment() {
+    const tableBody = document.getElementById('bisnisAnalysTable').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+    let inputData = {
+        type: 'BA',
+        description: ''
+    };
+    // Sel Message
+    let messageCell = newRow.insertCell(0);
+    let baMessage = document.createElement('input');
+    baMessage.style.width = '600px'; 
+    baMessage.style.border = '1px solid gray'
+    baMessage.setAttribute('name', 'ba_message');
+    baMessage.setAttribute('value', ''); 
+    messageCell.appendChild(baMessage);
+    baMessage.addEventListener('change', function () {
+        inputData.description = this.value;
+    });
+    data_group.detailDescription.create.push(inputData) 
 }
 
 
@@ -594,28 +560,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Function Tab
 function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].classList.remove("active");
-        var childNodes = tablinks[i].childNodes;
-        for (var j = 0; j < childNodes.length; j++) {
-            if (childNodes[j].classList) {
-                childNodes[j].classList.remove("active-text");
-            }
+    hideAllTabs();
+    showSelectedTab(tabName);
+    markActiveTab(evt.currentTarget);
+}
+function hideAllTabs() {
+    var tabcontent = document.getElementsByClassName("tabcontent");
+    Array.from(tabcontent).forEach(tab => tab.style.display = "none");
+    var tablinks = document.getElementsByClassName("tablinks");
+    Array.from(tablinks).forEach(tab => {
+        tab.classList.remove("active");
+        var textElement = tab.childNodes[0];
+        if (textElement && textElement.classList) {
+            textElement.classList.remove("active-text");
         }
-    }
+    });
+}
+function showSelectedTab(tabName) {
     document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.classList.add("active");
-    var textElement = evt.currentTarget.childNodes[0];
+}
+function markActiveTab(tab) {
+    tab.classList.add("active");
+    var textElement = tab.childNodes[0];
     if (textElement && textElement.classList) {
         textElement.classList.add("active-text");
     }
 }
+
 
 
 // ADD COMPONENT
@@ -627,32 +598,39 @@ function addRowToTableComponent() {
     let typeCell = newRow.insertCell(2);
     let requiredCell = newRow.insertCell(3);
     let dragableCell = newRow.insertCell(4);
-    let checkboxCell = newRow.insertCell(5);
     let inputData = {
         name: '',
         type: '',
         isRequired: false,
         draggable: false
     };
-    searchIconCell.innerHTML = '<button class="icon-button selectNodeButton"><div class="icon icon--search"></div></button>';
-    //  Name Input
+
+    searchIconCell.innerHTML = `
+        <button class="icon-button selectNodeButton">
+            <div class="icon icon--search"></div>
+        </button>
+    `;
+
+    // Name Input
     let nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.setAttribute('name', 'name_component');
-    nameInput.setAttribute('value', ''); 
+    nameInput.setAttribute('value', '');
     nameCell.appendChild(nameInput);
     nameInput.addEventListener('change', function () {
         inputData.name = this.value;
     });
-    // TYPE Input
+
+    // Type Input
     let typeInput = document.createElement('input');
     typeInput.type = 'text';
     typeInput.setAttribute('name', 'page_redirect');
-    typeInput.setAttribute('value', ''); 
+    typeInput.setAttribute('value', '');
     typeCell.appendChild(typeInput);
     typeInput.addEventListener('change', function () {
         inputData.type = this.value;
     });
+
     // Required Input
     let requiredInput = document.createElement('input');
     requiredInput.type = 'checkbox';
@@ -662,6 +640,7 @@ function addRowToTableComponent() {
     requiredInput.addEventListener('change', function () {
         inputData.isRequired = this.checked;
     });
+
     // Dragable Input
     let dragableInput = document.createElement('input');
     dragableInput.type = 'checkbox';
@@ -671,17 +650,9 @@ function addRowToTableComponent() {
     dragableInput.addEventListener('change', function () {
         inputData.draggable = this.checked;
     });
-    // data_component.push(inputData);
-    data_group.dataComponent.create.push(inputData) 
 
-    let checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.setAttribute('name', 'rowCheckbox');
-    checkbox.setAttribute('value', '');
-    checkboxCell.appendChild(checkbox);
-    nameInput.addEventListener('input', function () {
-        // item.name_action = nameInput.value;
-    });
+    // Add the data to the create array
+    data_group.dataComponent.create.push(inputData);
 }
 // ADD ACTION
 function addRowToTableAction() {
@@ -691,7 +662,6 @@ function addRowToTableAction() {
     let nameCell = newRow.insertCell(1);
     let redirectCell = newRow.insertCell(2);
     let alertCell = newRow.insertCell(3);
-    let checkboxCell = newRow.insertCell(4);
     let inputData = {
         name: '',
         redirect: '',
@@ -729,95 +699,16 @@ function addRowToTableAction() {
     // data_action.push(inputData);
     data_group.actionButton.create.push(inputData) 
 
-    let checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.setAttribute('name', 'rowCheckbox');
-    checkbox.setAttribute('value', '');
-    checkboxCell.appendChild(checkbox);
-    nameInput.addEventListener('input', function () {
-        // item.name_action = nameInput.value;
-    });
+    // let checkbox = document.createElement('input');
+    // checkbox.type = 'checkbox';
+    // checkbox.setAttribute('name', 'rowCheckbox');
+    // checkbox.setAttribute('value', '');
+    // checkboxCell.appendChild(checkbox);
+    // nameInput.addEventListener('input', function () {
+    //     // item.name_action = nameInput.value;
+    // });
 }
-// ADD USER STORY
-function addUserStory() {
-    const tableBody = document.getElementById('userStoryTable').getElementsByTagName('tbody')[0];
-    let newRow = tableBody.insertRow();
-    let inputData = {
-        name: '',
-        message: ''
-    };
-    // Sel Name
-    let nameCell = newRow.insertCell(0);
-    let nameInput = document.createElement('input');
-    nameInput.style.border = '1px solid gray'
-    nameInput.type = 'text';
-    nameInput.setAttribute('name', 'name_story');
-    nameInput.setAttribute('value', ''); 
-    nameCell.appendChild(nameInput);
-    nameInput.addEventListener('change', function () {
-        inputData.name = this.value;
-    });
-    // Sel Message
-    let messageCell = newRow.insertCell(1);
-    let storyInput = document.createElement('textarea');
-    storyInput.style.width = '400px'; 
-    storyInput.style.height = '100px'; 
-    storyInput.style.border = '1px solid gray'
-    storyInput.setAttribute('name', 'story_message');
-    storyInput.setAttribute('value', ''); 
-    messageCell.appendChild(storyInput);
-    storyInput.addEventListener('change', function () {
-        inputData.message = this.value;
-    });
-    // data_story.push(inputData);
-    data_group.userStory.create.push(inputData) 
-}
-// ADD TL MESSAGE
-function addTLMessage() {
-    const tableBody = document.getElementById('technicalLeadTable').getElementsByTagName('tbody')[0];
-    let newRow = tableBody.insertRow();
-    let inputData = {
-        role: 'T',
-        message: ''
-    };
-    // Sel Message
-    let messageCell = newRow.insertCell(0);
-    let tlMessage = document.createElement('textarea');
-    tlMessage.style.width = '400px'; 
-    tlMessage.style.height = '100px'; 
-    tlMessage.style.border = '1px solid gray'
-    tlMessage.setAttribute('name', 'tl_message');
-    tlMessage.setAttribute('value', ''); 
-    messageCell.appendChild(tlMessage);
-    tlMessage.addEventListener('change', function () {
-        inputData.message = this.value;
-    });
-    // data_description.push(inputData);
-    data_group.detailDescription.create.push(inputData) 
-}
-// ADD BA COMMENT
-function addBAComment() {
-    const tableBody = document.getElementById('bisnisAnalysTable').getElementsByTagName('tbody')[0];
-    let newRow = tableBody.insertRow();
-    let inputData = {
-        role: 'BA',
-        message: ''
-    };
-    // Sel Message
-    let messageCell = newRow.insertCell(0);
-    let baMessage = document.createElement('textarea');
-    baMessage.style.width = '400px'; 
-    baMessage.style.height = '100px'; 
-    baMessage.style.border = '1px solid gray'
-    baMessage.setAttribute('name', 'tl_message');
-    baMessage.setAttribute('value', ''); 
-    messageCell.appendChild(baMessage);
-    baMessage.addEventListener('change', function () {
-        inputData.message = this.value;
-    });
-    // data_description.push(inputData);
-    data_group.detailDescription.create.push(inputData) 
-}
+
 
 
 document.getElementById('changeLog').onclick = function() {
@@ -829,13 +720,9 @@ document.getElementById('changeLog').onclick = function() {
 function submitData() {
     parent.postMessage({ pluginMessage: { 
         type: 'submitDataButton', 
-        // type_frame: selectedValue,
-        // data_component: data_component,
-        // data_action: data_action,
-        // data_story: data_story,
-        // data_description: data_description,
         data_group: data_group
     } }, '*');
+    
 }
 
 </script>

@@ -33,35 +33,32 @@ figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
 figma.skipInvisibleInstanceChildren = true
 
 // FUNCTION LOGIN
-function loginUser(url: string, email: string, password: string ) {
-  fetch(`${url}/auth/login`, {
+async function loginUser(url: string, email: any, password: any) {
+  try {
+    const response = await fetch(`${url}/auth/login`, {
       method: 'POST',
       headers: {
-          'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-          mode: 'cookie',
-          email: email,
-          password: password,
+        mode: 'cookie',
+        email,
+        password,
       }),
-  })
-  .then(response => {
+    });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    return response.json();
-  })
-  .then(res => {
-      token = res
-      console.log("data token", token.data.access_token)
-      figma.ui.postMessage({ type: 'login-success', data: res });
-      figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
-    
-  })
-  .catch(error => {
-      figma.ui.postMessage({ type: 'login-failed', error: error.toString() });
-  });
+    const res = await response.json();
+    token = res;
+    console.log("data token", token.data.access_token);
+    figma.ui.postMessage({ type: 'login-success', data: res });
+    figma.showUI(__uiFiles__.view, { width: 700, height: 580, themeColors: false });
+  } catch (error: any) {
+    figma.ui.postMessage({ type: 'login-failed', error: error.toString() });
+  }
 }
+
 
 figma.ui.onmessage = async msg => {
   if (msg.type === 'login') {
@@ -83,47 +80,39 @@ figma.ui.onmessage = async msg => {
   }
     
   if (msg.type === 'analyze') {
-    selectedFrame = figma.currentPage.selection[0];
+    const selectedFrame = figma.currentPage.selection[0];
+    
     if (selectedFrame && selectedFrame.type === 'FRAME') {
-      childrenComponent.component = [];
-      childrenComponent.action = [];
-      const parent = getParentElement(selectedFrame);
-      inspectChildElement(selectedFrame);
-      let allComponents = setComponentGroup();
-      const frameData: Object = {
-        id: figma.fileKey+"::::"+selectedFrame.id,
-        file_key: figma.fileKey,
-        frame: {
-          id: selectedFrame.id,
-          name: selectedFrame.name,
-        },
-        type: getFrameType(selectedFrame),
-        feature: {
-          id: parent.feature?.id,
-          name: parent.feature?.name,
-        },
-        page : {
-          id: parent.page?.id,
-          name: parent.page?.name,
-        },
-        cluster : {
-          id: parent.cluster?.id,
-          name: parent.cluster?.name,
-        },
-        module : {
-          id: parent.module?.id,
-          name: parent.module?.name,
-        },
-        solution: {
-          id: parent.file?.id,
-          name: parent.file?.name
-        },
-        childrenGroup:  allComponents //childrenComponent
-      }
-      selectedFrame.setPluginData('frameData', JSON.stringify(frameData));
-      figma.notify('Analyze done! \uD83C\uDF89 Click Show Data.');
-    }else figma.notify('Please select a Frame');
+        childrenComponent.component = [];
+        childrenComponent.action = [];
+
+        const parent = getParentElement(selectedFrame);
+        inspectChildElement(selectedFrame);
+
+        const allComponents = setComponentGroup();
+        const frameData = {
+            id: `${figma.fileKey}::::${selectedFrame.id}`,
+            file_key: figma.fileKey,
+            frame: {
+                id: selectedFrame.id,
+                name: selectedFrame.name,
+            },
+            type: getFrameType(selectedFrame),
+            feature: parent.feature ? { id: parent.feature.id, name: parent.feature.name } : {},
+            page: parent.page ? { id: parent.page.id, name: parent.page.name } : {},
+            cluster: parent.cluster ? { id: parent.cluster.id, name: parent.cluster.name } : {},
+            module: parent.module ? { id: parent.module.id, name: parent.module.name } : {},
+            solution: parent.file ? { id: parent.file.id, name: parent.file.name } : {},
+            childrenGroup: allComponents,
+        };
+
+        selectedFrame.setPluginData('frameData', JSON.stringify(frameData));
+        figma.notify('Analyze done! \uD83C\uDF89 Click Show Data.');
+    } else {
+        figma.notify('Please select a Frame');
+    }
   }
+
 
   if (msg.type === 'showData'){
     selectedFrame = figma.currentPage.selection[0];
@@ -148,7 +137,7 @@ figma.ui.onmessage = async msg => {
           return response.json();
         })
         .then(data => {
-          console.log("data", data)
+          // console.log("data", data)
           console.log("syncDataJSON", frameData)
       
            
@@ -157,19 +146,22 @@ figma.ui.onmessage = async msg => {
           let getDataAction = dataGET.actionButton
           let resultDataComponent = frameData.childrenGroup.component
           let getDataComponent = dataGET.dataComponent
-          let resultDataUserStory = frameData.childrenGroup.userStory
+          // let resultDataUserStory = frameData.childrenGroup.userStory
           let getDataUserStory = dataGET.userStory
-          let resultDataDescription = frameData.childrenGroup.detailDescription
+          // let resultDataDescription = frameData.childrenGroup.detailDescription
           let getDataDescription = dataGET.detailDescription
+          let getDataTLComment = dataGET.tComment
+          let getDataBAComment = dataGET.baComment
       
           populateResult = { 
              dataAction: loopDataGetNew(getDataAction, resultDataAction),  
              dataComponent: loopDataGetNew(getDataComponent, resultDataComponent),  
-             dataUserStory: getDataUserStory, resultDataUserStory,  
-             dataDescription: getDataDescription, resultDataDescription, 
+             dataUserStory: getDataUserStory,  
+             dataDescription: getDataDescription, 
+             dataTLComment: getDataTLComment,
+             dataBAComment: getDataBAComment
           }
-      
-          console.log("Comp", populateResult.dataComponent)
+          console.log("Comp", dataGET)
           
           figma.ui.postMessage({ type: 'analysisResult', data: {dataGET: data, resultAnalys: frameData, populateResult} });
         })
@@ -191,71 +183,54 @@ figma.ui.onmessage = async msg => {
     figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
   }
   if (msg.type === 'submitDataButton') {
-    console.log("data:", msg.data_group)
-    // console.log("component:", msg.data_component)
-    // console.log("action:", msg.data_action)
-    // console.log("data story", msg.data_story)
-    // console.log("data description:", msg.data_description)
-    const staticToken = "tZUjr2tRUjEZHdYhEMOCWQypanPTcfKH"
-
-    await fetch(`${urlMigration}/figma_frame`, {
-      method: 'POST',
-      headers: {
+    const staticToken = "tZUjr2tRUjEZHdYhEMOCWQypanPTcfKH";
+    const endpoint = `${urlMigration}/figma_frame`;
+    const requestData = {
+      token: staticToken,
+      id: `${figma.fileKey}::::${selectedFrame.id}`,
+      file_key: figma.fileKey,
+      nodeId: selectedFrame.id,
+      name: selectedFrame.name,
+      type: msg.data_group.type,
+      actionButton: { ...msg.data_group.actionButton },
+      dataComponent: { ...msg.data_group.dataComponent },
+      userStory: { ...msg.data_group.userStory },
+      detailDescription: { ...msg.data_group.detailDescription },
+      figmaComment: { ...msg.data_group.figmaComment },
+    };
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
           'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-          token: staticToken,
-          id: figma.fileKey+"::::"+selectedFrame.id,
-          file_key: figma.fileKey,
-          nodeId: selectedFrame.id,
-          name: selectedFrame.name,
-          type: msg.data_group.type,
-          actionButton: msg.data_group.actionButton,
-          dataComponent: msg.data_group.dataComponent,
-          userStory: msg.data_group.userStory,
-          detailDescription: msg.data_group.detailDescription,
-          figmaComment: msg.data_group.figmaComment,
-      }),
-    })
-    .then(response => response.json())
-    .then(res => {
-        console.log('DataSend:', res);
-    })
-    .catch(error => {
-        console.error('DataSend failed:', error);
-    });
-
+        },
+        body: JSON.stringify(requestData),
+      });
+      const res = await response.json();
+      console.log('DataSend:', res);
+      msg.data_group = null;
+    } catch (error) {
+      console.error('DataSend failed:', error);
+    }
   }
  
 };
 
 
-function loopDataGetNew(data1: any[], data2: { filter: (arg0: (item: any) => boolean) => { (): any; new(): any; length: number; }; map: (arg0: (itemRes: any) => void) => void; }){
-  let newDataToPatch: any[] = []  
-  let newDataToCreate: any[] = []  
-  let newDataToDelete: any[] = []   
-  let newData: any = {}  
-  data1.map((itemGET) => {
-          if(data2.filter((item)=>item.code === itemGET.code).length > 0){
-              newDataToPatch.push(itemGET)
-          }
-      })
-      data2.map((itemRes) => {
-          if(newDataToPatch.filter((item)=>item.code !== itemRes.code)){
-              newDataToCreate.push(itemRes)
-          }
-          else{
-            newDataToDelete.push(itemRes)
-              console.log("delete")
-          }
-      })
-      newData = {
-        update: newDataToPatch,
-        create: newDataToCreate,
-        delete: newDataToDelete,
-      }
-      return newData
+function loopDataGetNew(data1: any[], data2: { filter: (arg0: (item: any) => boolean) => { (): any; new(): any; length: number; }; map: (arg0: (itemRes: any) => void) => void; }) {
+  let newDataToPatch: any = data1.filter(itemGET => data2.filter(item => item.code === itemGET.code).length > 0);
+  let newDataToCreate: any = data2.filter(itemRes => !newDataToPatch.some((item: { code: any; }) => item.code === itemRes.code));
+  let newDataToDelete: any = data2.filter(itemRes => newDataToPatch.some((item: { code: any; }) => item.code === itemRes.code));
+  
+  const newData = {
+    update: newDataToPatch,
+    create: newDataToCreate,
+    delete: newDataToDelete,
+  };
+
+  return newData;
 }
+
 
 function selectNodeById(nodeId: string): void {
   const selectedNode = figma.getNodeById(nodeId);
