@@ -14,14 +14,6 @@ let childrenComponent: ChildrenComponent = {
 
 let componentCode: any;
 let selectedFrame: SceneNode
-let valSelectedNode: any
-let nodeIdToSelect
-let getName 
-let isSelected 
-let logResult
-let selectedNode 
-let syncData
-let syncDataJSON: any
 const apiUrl = "https://datacore.mvtool.machinevision.global";
 const urlMigration = "https://core.mvtool.machinevision.global"
 let token: any
@@ -29,10 +21,11 @@ let populateResult: any
 let dataGET: any
 
 console.clear();
+//<!--------------------------------------- FIGMA PLUGIN VIEW UI FIRST  ------------------------------------------->>
 figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
 figma.skipInvisibleInstanceChildren = true
 
-// FUNCTION LOGIN
+//<!--------------------------------------- FUNCTION LOGIN  ------------------------------------------->>
 async function loginUser(url: string, email: any, password: any) {
   try {
     const response = await fetch(`${url}/auth/login`, {
@@ -59,17 +52,18 @@ async function loginUser(url: string, email: any, password: any) {
   }
 }
 
-
+//<!--------------------------------------- FIGMA ON MESSAGE  ------------------------------------------->>
 figma.ui.onmessage = async msg => {
+  //<!--------------------------------------- TYPE LOGIN  ------------------------------------------->>
   if (msg.type === 'login') {
     loginUser(apiUrl, msg.email, msg.password);
   }
-
+//<!--------------------------------------- SELECT NODE  ------------------------------------------->>
   if (msg.type === 'selectNodeById') {
     const nodeIdToSelect = msg.nodeId;
     selectNodeById(nodeIdToSelect);
   }
-
+//<!--------------------------------------- GET FRAME  ------------------------------------------->>
   if (msg.type === 'getComponentFrameData'){
     const selectedFrame = figma.currentPage.selection[0];
     const frame = {
@@ -78,17 +72,14 @@ figma.ui.onmessage = async msg => {
     };
     figma.ui.postMessage({ type: 'setComponentFrameData', result: frame });
   }
-    
+//<!--------------------------------------- ANALYS  ------------------------------------------->>
   if (msg.type === 'analyze') {
     const selectedFrame = figma.currentPage.selection[0];
-    
     if (selectedFrame && selectedFrame.type === 'FRAME') {
         childrenComponent.component = [];
         childrenComponent.action = [];
-
         const parent = getParentElement(selectedFrame);
         inspectChildElement(selectedFrame);
-
         const allComponents = setComponentGroup();
         const frameData = {
             id: `${figma.fileKey}::::${selectedFrame.id}`,
@@ -105,20 +96,17 @@ figma.ui.onmessage = async msg => {
             solution: parent.file ? { id: parent.file.id, name: parent.file.name } : {},
             childrenGroup: allComponents,
         };
-
         selectedFrame.setPluginData('frameData', JSON.stringify(frameData));
         figma.notify('Analyze done! \uD83C\uDF89 Click Show Data.');
     } else {
         figma.notify('Please select a Frame');
     }
   }
-
-
+//<!--------------------------------------- SHOW DATA  ------------------------------------------->>
   if (msg.type === 'showData'){
     selectedFrame = figma.currentPage.selection[0];
     if (selectedFrame && selectedFrame.type === 'FRAME') {
       const syncData = selectedFrame.getPluginData('frameData');
-      
       if (syncData) {        
         let frameData = JSON.parse(syncData);
         let fileKeyData = figma.fileKey
@@ -137,10 +125,6 @@ figma.ui.onmessage = async msg => {
           return response.json();
         })
         .then(data => {
-          // console.log("data", data)
-          console.log("syncDataJSON", frameData)
-      
-           
           dataGET = data
           let resultDataAction = frameData.childrenGroup.action
           let getDataAction = dataGET.actionButton
@@ -152,18 +136,19 @@ figma.ui.onmessage = async msg => {
           let getDataDescription = dataGET.detailDescription
           let getDataTLComment = dataGET.tComment
           let getDataBAComment = dataGET.baComment
-      
+          let getDataManHour = dataGET.manHour
           populateResult = { 
              dataAction: loopDataGetNew(getDataAction, resultDataAction),  
              dataComponent: loopDataGetNew(getDataComponent, resultDataComponent),  
              dataUserStory: getDataUserStory,  
              dataDescription: getDataDescription, 
              dataTLComment: getDataTLComment,
-             dataBAComment: getDataBAComment
+             dataBAComment: getDataBAComment,
+             dataManHour: getDataManHour
           }
-          console.log("Comp", populateResult)
-          
+          console.log("Comp", frameData)
           figma.ui.postMessage({ type: 'analysisResult', data: {dataGET: data, resultAnalys: frameData, populateResult} });
+          figma.notify('Show Data done! \uD83C\uDF89');
         })
         .catch(error => {
           console.error('Fetch error:', error);
@@ -173,15 +158,15 @@ figma.ui.onmessage = async msg => {
       }
     }else figma.notify('Please select a Frame'); 
   }
-
+//<!--------------------------------------- CHANGE LOG  ------------------------------------------->>
   if (msg.type === 'showChangeLog') {
-    // figma.showUI(__uiFiles__.changeLog,{ width:700, height: 580, themeColors: false})
     figma.showUI(__uiFiles__.changelog,{ width:700, height: 580, themeColors: false})
-
   }
+//<!--------------------------------------- BACK VIEW  ------------------------------------------->>
   if (msg.type === 'backView') {
     figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
   }
+//<!--------------------------------------- SUBMIT DATA  ------------------------------------------->>
   if (msg.type === 'submitDataButton') {
     const staticToken = "tZUjr2tRUjEZHdYhEMOCWQypanPTcfKH";
     const endpoint = `${urlMigration}/figma_frame`;
@@ -197,7 +182,38 @@ figma.ui.onmessage = async msg => {
       userStory: { ...msg.data_group.userStory },
       detailDescription: { ...msg.data_group.detailDescription },
       figmaComment: { ...msg.data_group.figmaComment },
+      manHour: { ...msg.data_group.manHour },
     };
+    // console.log("test data post:", requestData)
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+      const res:any = await response.json();
+      console.log('DataSend:', res);
+      msg.data_group = null;
+      figma.notify('Data submitted successfully!');
+    } catch (error) {
+      console.error('DataSend failed:', error);
+      msg.data_group = null;
+      figma.notify('Submission failed. Please try again.');
+    }
+  }
+  //<!--------------------------------------- DELETE DATA  ------------------------------------------->>
+  if (msg.type === 'deleteDataTest') {
+    const staticToken = "tZUjr2tRUjEZHdYhEMOCWQypanPTcfKH";
+    const endpoint = `${urlMigration}/delete_figma_frame`;
+    let requestData: any = {
+      token: staticToken,
+      id: `${figma.fileKey}::::${selectedFrame.id}`,
+      file_key: figma.fileKey,
+      nodeId: selectedFrame.id,
+    };
+    // console.log("test data post:", requestData)
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -210,38 +226,33 @@ figma.ui.onmessage = async msg => {
       console.log('DataSend:', res);
       msg.data_group = null;
       requestData = null
-      figma.notify('Data submitted successfully!');
-      
+      figma.notify('Data delete successfully!');
     } catch (error) {
       console.error('DataSend failed:', error);
-      figma.notify('Submission failed. Please try again.');
-
+      msg.data_group = null;
+      requestData = null
+      figma.notify('Delete failed. Please try again.');
     }
   }
  
 };
 
 
+//<!--------------------------------------- FUNCTION LOOP  ------------------------------------------->>
 function loopDataGetNew(data1: any[], data2: { filter: (arg0: (item: any) => boolean) => { (): any; new(): any; length: number; }; map: (arg0: (itemRes: any) => void) => void; }) {
   let newDataToPatch: any = data1.filter(itemGET => data2.filter(item => item.code === itemGET.code).length > 0);
   let newDataToCreate: any = data2.filter(itemRes => !newDataToPatch.some((item: { code: any; }) => item.code === itemRes.code));
-  let newDataToDelete: any = data2.filter(itemRes => newDataToPatch.some((item: { code: any; }) => item.code === itemRes.code));
-  
+  let newDataToDelete: any = data1.filter(itemGET => data2.filter(item => item.code === itemGET.code).length > 0);
   const newData = {
     update: newDataToPatch,
     create: newDataToCreate,
     delete: newDataToDelete,
   };
-
   return newData;
 }
-
-
-
-
+//<!--------------------------------------- SELECT NODE  ------------------------------------------->>
 function selectNodeById(nodeId: string): void {
   const selectedNode = figma.getNodeById(nodeId);
-
   if (selectedNode) {
     // Select the node
     figma.viewport.scrollAndZoomIntoView([selectedNode]);
@@ -251,7 +262,7 @@ function selectNodeById(nodeId: string): void {
     console.error(`Node ID not found: ${nodeId}`);
   }
 }
-
+//<!--------------------------------------- GET PARENT  ------------------------------------------->>
 function getParentElement(frame: FrameNode): {
   feature: SectionNode | null;
   page: SectionNode | null;
@@ -260,13 +271,11 @@ function getParentElement(frame: FrameNode): {
   file: PageNode | null;
 } 
 {
-
   const featureNode = frame.parent as SectionNode | null;  
   const pageNode = featureNode?.parent as SectionNode | null;
   const clusterNode = pageNode?.parent as SectionNode | null;
   const moduleNode = clusterNode?.parent as SectionNode | null;
   const fileNode = moduleNode?.parent as PageNode | null;
-
   return {
     feature: (featureNode?.type === "SECTION") ? featureNode : null,
     page: (pageNode?.type === "SECTION") ? pageNode : null,
@@ -276,16 +285,14 @@ function getParentElement(frame: FrameNode): {
   };
 }
 
-// Function to get elements inside a frame
+//<!--------------------------------------- INSPECT CHILD ------------------------------------------->>
 function inspectChildElement(frame: SceneNode) {
   if (frame.visible) {
     let componentCodeMappingCheck = isSuitableComponent(frame as InstanceNode);
-    
     if (frame.name.startsWith("[]") || (frame.type === "INSTANCE" && (componentCode = componentCodeMappingCheck))) {
       if (componentCode == "[C]") childrenComponent.component.push(frame.id);
       if (componentCode == "[A]") childrenComponent.action.push(frame.id);
     }
-
     // Check if the node is a container that could have children
     if ('children' in frame) {
       const children = frame.children as readonly SceneNode[];
@@ -295,10 +302,9 @@ function inspectChildElement(frame: SceneNode) {
     }
   }
 }
-
+//<!--------------------------------------- SUITABLE COMPONENT  ------------------------------------------->>
 function isSuitableComponent(node: InstanceNode): InstanceNode | String | any { 
   let mappingFound, instanceType: string | undefined;
-  
   if(node.mainComponent){
     instanceType = node.mainComponent.parent?.type;
     mappingFound = componentMapping.find(component => (component.name === node.name) && instanceType === 'COMPONENT_SET');
@@ -306,36 +312,29 @@ function isSuitableComponent(node: InstanceNode): InstanceNode | String | any {
   }
 
 }
-
+//<!--------------------------------------- FRAME TYPE  ------------------------------------------->>
 function getFrameType(frame:SceneNode): Object | undefined {
-  
   const _frame =  frame.name;
   const typeList: readonly { name: string; code: string }[] = [
     { code: "[D]", name: "Dropdown" },
     { code: "[M]", name: "Modal" },
   ];
   const frameType = typeList.find(item => item.code === _frame.substring(0, 3))?.name;
-
   return frameType;
 }
-
+//<!--------------------------------------- SET COMPONENT GROUP  ------------------------------------------->>
 function setComponentGroup(): Object | undefined {
-
   let componentGroup: any = {
     component: [],
     action: []
   };
-  
   for (var key in childrenComponent) {
     if (key == 'component') {
-      
       for (var index in childrenComponent.component) {   
         const c = figma.getNodeById(childrenComponent.component[index]) as InstanceNode;      
         const baseComponent = c.findChildren(n => n.name === "_BaseField")[0] as InstanceNode;
-        
         let id = c.id;
         let allProps = controller.instancePropertyCheck(c.id, "*");
-        
         if(baseComponent !== undefined) {
           let name = controller.instancePropertyCheck(baseComponent.id, "Label");
           allProps['base'] = controller.instancePropertyCheck(baseComponent.id, "*");
@@ -343,12 +342,8 @@ function setComponentGroup(): Object | undefined {
           console.log("C is null");
           let name = "c.name";
         }
-
-
-        // Check if an object with the same name and type already exists
         controller.setComponentData(id);
         let existingComponent = componentGroup.component.find((comp: { id: any; code: any; name: any; type: any; }) =>  comp.code === controller.componentData.code || (comp.name == controller.componentData.name && comp.type == controller.componentData.type));
-
         if(!existingComponent){
           componentGroup.component.push({
             id: controller.componentData.id,
@@ -360,21 +355,17 @@ function setComponentGroup(): Object | undefined {
             properties: allProps
           });
         }
-        
       }
     }
 
     if (key == 'action') {      
       for (var index in childrenComponent.action) {
-        
         let c = figma.getNodeById(childrenComponent.action[index]) as InstanceNode;
         let id = c.id;
         let allProps = controller.instancePropertyCheck(id, "*");
-        
         controller.setComponentData(id);
         // Check if an object with the same name and type already exists
         let existingComponent = componentGroup.action.find((comp: {id: any; code: any; name: any;}) => comp.code === controller.componentData.code);
-
         if(!existingComponent){
           componentGroup.action.push({
             id: controller.componentData.id,
@@ -385,7 +376,6 @@ function setComponentGroup(): Object | undefined {
             properties: allProps
           });
         }
-        
       }
     }
   } 

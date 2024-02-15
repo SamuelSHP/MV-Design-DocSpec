@@ -10,6 +10,10 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 32px;
+        margin-bottom: 16px;
+    }
+    .tablinks{
+        color: #5C5C5C;
     }
     .tablinks.active {
         color: rgb(0, 0, 0);
@@ -17,36 +21,30 @@
     }
     th, td {
         padding: 8px; 
-        border: 1px solid #e2e8f0; 
+        border-bottom: 1px solid #e2e8f0; 
     }
 </style>
 <div class="p-3">
     <div class="button-wrapper">
-        <!-- Button Analys & Show Data-->
+        <!----------------------------------- Button Analys & Show Data ---------------------------------------->
        <div class="flex">
             <button id="analyzeButton" class="button button--primary mr-2">Analyze</button>
             <button id="showDataButton" class="button button--secondary">Show Data</button>
        </div>
-       <!-- Button ChangeLog and Submit Data-->
+       <!-------------------------------- Button ChangeLog, Submit Data, Delete Data --------------------------------------->
        <div class="flex">
             <button id="changeLog"class="text-blue-600 text-xs mr-3">Changelog</button>
-            <button onclick="submitData()" class="button button--primary">Submit</button>
+            <button onclick="submitData()" class="button button--primary mr-3">Submit</button>
+            <button onclick="deleteData()" class="button bg-red-500">Delete</button>
         </div> 
     </div>
-    <!-- SELECT TYPE DATA -->
-    <div id="typedata" class="mt-2">
-        <label for="typeFrame">Type:</label>
-        <select id="typeFrame" name="typeFrame">
-            <option value="">select type</option>
-        </select>
-    </div>
     <div id="resultContainer" class="mt-2">
-        <!-- Frame Data Section -->
+        <!------------------------------ Frame Data Section ------------------------------------------>
         <div class="frameInfoSection">
             <div class="type type--xlarge type--bold">Frame Information</div>
             <div class="frameInfoPanel">
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                    <thead class="text-xs text-blue-700 font-bold bg-blue-200">
+                <table class="w-full text-sm text-left rtl:text-right text-gray-800 border">
+                    <thead class="text-xs text-gray-700 font-bold bg-gray-200 p-2">
                         <tr><th>Name</th><th>Feature</th><th>Page</th><th>Cluster</th><th>Module</th></tr>
                     </thead>
                     <tbody>
@@ -61,49 +59,51 @@
                 </table>
             </div>
         </div>
-        <!-- Tabs -->
-        <div class="tabs flex justify-left mt-4">
-            <button class="tablinks mr-3 text-sm active" onclick="openTab(event, 'components')">Component</button>
-            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'action')">Action</button>
-            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'story')">User Story</button>
-            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'technical')">Technical Message</button>
-            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'ba')">BA Comment</button>
+         <!------------------------------------ SELECT TYPE DATA ------------------------------------------>
+        <div id="typedata" class="flex flex-col my-4 gap-1">
+            <label for="typeFrame" class="text-sm font-bold">Frame Type</label>
+            <select id="typeFrame" name="typeFrame" class="py-1 px-1 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200">
+                <option value="" class="text-gray-100">Select Type</option>
+            </select>
         </div>
-        <!-- COMPONENT TAB -->
+        <!---------------------------------------------------- Tabs ------------------------------------------->
+        <div class="tabs flex justify-left my-4">
+            <button class="tablinks pr-3 text-sm active" onclick="openTab(event, 'components')">Component</button>
+            <button class="tablinks pr-3 text-sm" onclick="openTab(event, 'action')">Action</button>
+            <button class="tablinks pr-3 text-sm" onclick="openTab(event, 'story')">User Story</button>
+            <button class="tablinks pr-3 text-sm" onclick="openTab(event, 'technical')">Technical Message</button>
+            <button class="tablinks pr-3 text-sm" onclick="openTab(event, 'ba')">BA Comment</button>
+            <button class="tablinks pr-3 text-sm" onclick="openTab(event, 'manhour')">Man Hour</button>
+        </div>
+        <!----------------------------------------------- COMPONENT TAB ----------------------------------------->
         <div id="components" class="tabcontent mt-2">
             <div class="componentDetail" id="groupcomponent">
-                <div class="bg-gray-200 rounded-lg h-auto">
-                    <div class="relative overflow-x-auto rounded-lg">
+                <div class="h-auto">
+                    <div class="relative overflow-x-auto">
                         <table id="tableComponent" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                            <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                            <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                                 <tr>
-                                    <td>&nbsp;</td><td>Name</td><td>Type</td><td>Required</td><td>Dragable</td>
-                                    <!-- <td>
-                                        <input id="checkAllRows" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                    </td> -->
+                                    <td>&nbsp;</td><td class="w-3/12">Name</td><td>Type</td><td>Required</td><td>Dragable</td>
                                 </tr>
                             </thead>
-                            <tbody class="p-2"></tbody>
+                            <tbody class="p-1"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
             <div class="flex justify-left mt-4">
-                <button id="test" class="text-blue-600 text-xs" onclick="addRowToTableComponent()">+ Add component other</button>
+                <button id="test" class="text-blue-600 text-xs" onclick="addRowToTableComponent()">+ Add Other Component</button>
             </div>
         </div>
-        <!-- Action Tabs -->
+        <!----------------------------------------------- Action Tabs ----------------------------------------------->
         <div id="action" class="tabcontent mt-2" style="display:none;">
             <div id="groupAction">
-                <div class="bg-gray-200 rounded-lg h-auto">
-                    <div class="relative overflow-x-auto rounded-lg">
+                <div class="h-auto">
+                    <div class="relative overflow-x-auto">
                         <table id="tableAction" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                            <thead class="text-xs text-blue-700  bg-blue-200 font-bold p-2">
+                            <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                                 <tr>
                                     <td>&nbsp;</td><td>Name</td><td>Redirect</td><td>Alert Prompt</td>
-                                    <!-- <td>
-                                        <input id="checkAllRowsAction" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                    </td> -->
                                 </tr>
                             </thead>
                             <tbody class="p-2"></tbody>
@@ -112,30 +112,30 @@
                 </div>
             </div>
             <div class="flex justify-left mt-4">
-                <button id="test" class="text-blue-600 text-xs" onclick="addRowToTableAction()">+ Add action other</button>
+                <button id="test" class="text-blue-600 text-xs" onclick="addRowToTableAction()">+ Add Other Action</button>
             </div>
         </div>
-        <!-- User Story Tabs -->
+        <!----------------------------------------------- User Story Tabs ----------------------------------------------->
         <div id="story" class="tabcontent mt-2" style="display:none;">
             <div id="userStory">
                 <table id="userStoryTable" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                    <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                    <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                         <tr>
-                            <td>Name User</td><td>Message Story</td>
+                            <td class="w-3/12">Sebagai</td><td class="w-full">Saya ingin</td>
                         </tr>
                     </thead>
                     <tbody class="p-2"></tbody>
                 </table>
             </div>
             <div class="flex justify-left mt-4">
-                <button id="test" class="text-blue-600 text-xs" onclick="addUserStory()">+ Add user story other</button>
+                <button id="test" class="text-blue-600 text-xs" onclick="addUserStory()">+ Add another User Story </button>
             </div>
         </div>
-        <!-- TL Tabs -->
+        <!----------------------------------------------- TL Tabs ----------------------------------------------->
         <div id="technical" class="tabcontent mt-2" style="display:none;">
             <div id="technicalLead">
                 <table id="technicalLeadTable" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                    <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                    <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                         <tr>
                             <td>Message</td>
                         </tr>
@@ -144,14 +144,14 @@
                 </table>       
             </div>
             <div class="flex justify-left mt-4">
-                <button id="test" class="text-blue-600 text-xs" onclick="addTLMessage()">+ Add message other</button>
+                <button id="test" class="text-blue-600 text-xs" onclick="addTLMessage()">+ Add another Message</button>
             </div>
         </div>
-        <!-- BA Tabs -->
+        <!----------------------------------------------- BA Tabs ----------------------------------------------->
         <div id="ba" class="tabcontent mt-2" style="display:none;">
             <div id="bisnisAnalys">
                 <table id="bisnisAnalysTable" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                    <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                    <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                         <tr>
                             <td>Comment</td>
                         </tr>
@@ -160,13 +160,30 @@
                 </table>         
             </div>
             <div class="flex justify-left mt-4">         
-                <button id="test" class="text-blue-600 text-xs" onclick="addBAComment()">+ Add comment other</button>
+                <button id="test" class="text-blue-600 text-xs" onclick="addBAComment()">+ Add another Comment </button>
+            </div>
+        </div>
+        <!----------------------------------------------- Man Hour Tabs ----------------------------------------------->
+        <div id="manhour" class="tabcontent mt-2" style="display:none;">
+            <div id="manHour">
+                <table id="manHourTable" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
+                    <thead  class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
+                        <tr>
+                            <td class="w-2/12">Man Hour</td><td>&nbsp;</td>
+                        </tr>
+                    </thead>
+                    <tbody class="p-2"></tbody>
+                </table>         
+            </div>
+            <div class="flex justify-left mt-4">         
+                <button id="test" class="text-blue-600 text-xs" onclick="addManHour()">+ Add Man Hour</button>
             </div>
         </div>
     </div>
 </div>
 <script>
 
+//<!--------------------------------------- INITIAL DATA  ------------------------------------------->>
 let data_group = {
     type: '',
     actionButton: createEmptyObject(),
@@ -174,8 +191,9 @@ let data_group = {
     userStory: createEmptyObject(),
     detailDescription: createEmptyObject(),
     figmaComment: createEmptyObject(),
+    manHour: createEmptyObject(),
 };
-
+//<!--------------------------------------- GROUPING DATA  ------------------------------------------->>
 function createEmptyObject() {
     return {
         update: [],
@@ -184,26 +202,41 @@ function createEmptyObject() {
     };
 }
 
-// Function Analys Button 
+//<!--------------------------------------- ANALYZE BUTTON  ------------------------------------------->>
 document.getElementById('analyzeButton').onclick = function() {
     parent.postMessage({ pluginMessage: { type: 'analyze' } }, '*');      
 };
-// Function Show Button
+//<!--------------------------------------- SHOW BUTTON  ------------------------------------------->>
 document.getElementById('showDataButton').onclick = function() {
     parent.postMessage({ pluginMessage: { type: 'showData' } }, '*');
 }
-// On Message From Figma
+//<!--------------------------------------- CHANGE LOG BUTTON  ------------------------------------------->>
+document.getElementById('changeLog').onclick = function() {
+    parent.postMessage({ pluginMessage: { type: 'showChangeLog' } }, '*');  
+};
+//<!--------------------------------------- SUBMIT BUTTON  ------------------------------------------->>
+function submitData() {
+    parent.postMessage({ pluginMessage: { 
+        type: 'submitDataButton', 
+        data_group: data_group
+    } }, '*');
+    // console.log("submit",data_group)
+
+}
+//<!--------------------------------------- DELETE BUTTON  ------------------------------------------->>
+function deleteData() {
+    parent.postMessage({ pluginMessage: { 
+        type: 'deleteDataTest', 
+        data_group: data_group
+    } }, '*');
+    // console.log("delete",data_group)
+}
+
+
+//<!--------------------------------------- ON MESSAGE FROM FIGMA  ------------------------------------------->>
 onmessage = (event) => {
     const msg = event.data.pluginMessage;
-    
     if (msg.type === 'analysisResult') {
-        // data_group = msg.data.populateResult
-        // data_group.detailDescription = {
-        //     create : [...msg.data.populateResult?.tComment.create, ...msg.data.populateResult?.baComment.create],
-        //     update : [...msg.data.populateResult?.tComment.update, ...msg.data.populateResult?.baComment.update],
-        //     delete : [...msg.data.populateResult?.tComment.delete, ...msg.data.populateResult?.baComment.delete],   
-        // }
-        // console.log("TEST", msg.data.populateResult?.dataAction)
         typeSelectData(msg.data.dataGET) 
         displayResult(msg.data.resultAnalys);
         populateTableComponent(msg.data.populateResult?.dataComponent);
@@ -211,8 +244,17 @@ onmessage = (event) => {
         populateTableStory(msg.data.populateResult?.dataUserStory)
         populateTableTL(msg.data.populateResult?.dataTLComment)
         populateTableBA(msg.data.populateResult?.dataBAComment)
+        populateTableHour(msg.data.populateResult?.dataManHour)
+    }
+    if (event.data.pluginMessage.type === 'setComponentFrameData') {
+        let frame = event.data.pluginMessage.result;
+        nameInput.setAttribute('value', frame.name);
+        let button = nameInput.closest('tr').querySelector('button.selectNodeButton');
+        button.setAttribute('data-nodeid', frame.id);
     }
 };
+
+//<!--------------------------------------- SELECT TYPE ------------------------------------------->>
 // TYPE DATA SELECT FUNCTION
 function typeSelectData(data_group) {
     const dynamicOptions = ['FRAME', 'DROPDOWN', 'MODAL', 'NOTIFICATION'];
@@ -230,7 +272,7 @@ function typeSelectData(data_group) {
     });
 }
 
-
+//<!--------------------------------------- FRAME DATA VIEW  ------------------------------------------->>
 // Function Display Frame
 function displayResult(result) {
     document.getElementById('frameNameInfo').innerHTML = result.frame.name;
@@ -238,93 +280,121 @@ function displayResult(result) {
     document.getElementById('framePageInfo').innerHTML = result.page.name;
     document.getElementById('frameClusterInfo').innerHTML = result.cluster.name;
     document.getElementById('frameModuleInfo').innerHTML = result.module.name;
-    addSelectNodeButtonListener();
 }
 
+//<!--------------------------------------- TABLE COMPONENT  ------------------------------------------->>
 // TABLE COMPONENT
 function populateTableComponent(data) {
     const tableBody = document.getElementById('tableComponent').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
-
+    
     const processData = (item, update, isUpdate) => {
+        // console.log("HWOQ", item)
         const inputData = {
             id: isUpdate ? item.id : null,
             code: item.code,
             name: item.name,
             type: item.type,
-            required: item.required,
-            dragable: item.dragable 
+            required: item.required, // Ensure boolean
+            dragable: item.dragable // Ensure boolean
         };
-
         let row = tableBody.insertRow();
         let searchIconCell = row.insertCell(0);
         let nameCell = row.insertCell(1);
         let typeCell = row.insertCell(2);
         let requiredCell = row.insertCell(3);
         let dragableCell = row.insertCell(4);
-
         searchIconCell.innerHTML = `
-            <button class="icon-button selectNodeButton" data-nodeid="${item.id}">
+            <button class="icon-button selectNodeButton" data-nodeid="${item.code}">
                 <div class="icon icon--search"></div>
             </button>
         `;
-
+        addSelectNodeButtonListener();
         //  Name Input
         let nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.setAttribute('name', 'name_component');
+        nameInput.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         nameInput.setAttribute('value', item.name); 
         nameCell.appendChild(nameInput);
         nameInput.addEventListener('change', function () {
             inputData.name = this.value;
         });
-
         // TYPE Input
         let typeInput = document.createElement('input');
         typeInput.type = 'text';
         typeInput.setAttribute('name', 'type');
+        typeInput.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         typeInput.setAttribute('value', item.type); 
         typeCell.appendChild(typeInput);
         typeInput.addEventListener('change', function () {
             inputData.type = this.value;
         });
-
         // Required Input
         let requiredInput = document.createElement('input');
         requiredInput.type = 'checkbox';
-        requiredInput.setAttribute('name', 'required_component');
+        requiredInput.setAttribute('name', 'required');
         requiredInput.setAttribute('value', item.required); 
         requiredInput.checked = item.required;
         requiredCell.appendChild(requiredInput);
         requiredInput.addEventListener('change', function () {
-            inputData.required = this.checked;
+            inputData.required = requiredInput.checked;
         });
-
         // Dragable Input
         let dragableInput = document.createElement('input');
         dragableInput.type = 'checkbox';
-        dragableInput.setAttribute('name', 'required_component');
+        dragableInput.setAttribute('name', 'dragable');
         dragableInput.setAttribute('value', item.dragable);  
         dragableInput.checked = item.dragable;
         dragableCell.appendChild(dragableInput);
         dragableInput.addEventListener('change', function () {
-            inputData.dragable = this.checked;
+            inputData.dragable = dragableInput.checked;
+            
         });
-
+        console.log(inputData.dragable)
         update.push(inputData);
     };
-
-    data.update.length > 0 ? data.update.forEach(item => processData(item, data_group.dataComponent.update, true)) :
-                            data.create.forEach(item => processData(item, data_group.dataComponent.create, false));
-
+    data.update.length > 0 ? 
+        data.update.forEach(item => processData(item, data_group.dataComponent.update, true)) : 
+        data.create.forEach(item => processData(item, data_group.dataComponent.create, false));
+}
+// ADD COMPONENT
+function addRowToTableComponent() {
+    const tableBody = document.getElementById('tableComponent').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+    let inputData = {
+        name: '',
+        type: '',
+        isRequired: false,
+        draggable: false
+    };
+    function createAndAppendInput(cell, type, name, value, isCheckbox = false) {
+        let input = document.createElement('input');
+        input.type = type;
+        input.setAttribute('name', name);
+        input.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+        input.setAttribute('value', value);
+        if (isCheckbox) {
+            input.checked = value;
+            input.addEventListener('change', () => inputData[name] = input.checked);
+        } else {
+            input.addEventListener('change', () => inputData[name] = input.value);
+        }
+        cell.appendChild(input);
+    }
+    newRow.insertCell(0).innerHTML = `<button class="icon-button selectNodeButton"><div class="icon icon--search"></div></button>`;
+    createAndAppendInput(newRow.insertCell(1), 'text', 'name', inputData.name);
+    createAndAppendInput(newRow.insertCell(2), 'text', 'type', inputData.type);
+    createAndAppendInput(newRow.insertCell(3), 'checkbox', 'isRequired', inputData.isRequired, true);
+    createAndAppendInput(newRow.insertCell(4), 'checkbox', 'draggable', inputData.draggable, true);
+    data_group.dataComponent.create.push(inputData);
 }
 
-
+//<!--------------------------------------- TABLE ACTION  ------------------------------------------->>
 // TABLE ACTION
 function populateTableAction(data, data2) {
     const tableBody = document.getElementById('tableAction').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
-
     const processData = (item, update, isUpdate) => {
         const inputData = {
             id: isUpdate ? item.id : null,
@@ -339,61 +409,49 @@ function populateTableAction(data, data2) {
         let nameCell = row.insertCell(1);
         let redirectCell = row.insertCell(2);
         let alertCell = row.insertCell(3);
-
         searchIconCell.innerHTML = `
-            <button class="icon-button selectNodeButton" data-nodeid="${item.id}">
+            <button class="icon-button selectNodeButton" data-nodeid="${item.code}">
                 <div class="icon icon--search"></div>
             </button>
         `;
-
+        addSelectNodeButtonListener();
         // Name Input
         let nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.setAttribute('name', 'name_component');
+        nameInput.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         nameInput.setAttribute('value', item.name); 
         nameCell.appendChild(nameInput);
         nameInput.addEventListener('change', function () {
             inputData.name = this.value;
         });
-
         // Adding select box for page_redirect
         let selectRedirect = document.createElement('select');
         selectRedirect.setAttribute('name', 'page_redirect');
+        selectRedirect.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         selectRedirect.setAttribute('value', item.page_redirect);
-
-        // Add default null option
-        let defaultOption = document.createElement('option');
-        defaultOption.value = null;
-        defaultOption.text = 'Select an option';
-        selectRedirect.appendChild(defaultOption);
-
         var dynamicOptions = data2.parent_id?.childs;
         let optionRedirect;
-
         dynamicOptions.map(item => {
             optionRedirect = document.createElement('option');
             optionRedirect.value = item.id;
             optionRedirect.text = item.name;
             selectRedirect.appendChild(optionRedirect);
         });
-
         redirectCell.appendChild(selectRedirect);
-
         selectRedirect.addEventListener('change', function () {
             inputData.page_redirect = this.value;
         });
-
-       // Adding select box for alert_prompt
+        // Adding select box for alert_prompt
         let selectAlert = document.createElement('select');
         selectAlert.setAttribute('name', 'alert_prompt');
+        selectAlert.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         selectAlert.setAttribute('value', item.alert_prompt);
-
         // Add default null option
-        let defaultOptionAlert = document.createElement('option');
-        defaultOptionAlert.value = null;
-        defaultOptionAlert.text = 'Select an option';
-        selectAlert.appendChild(defaultOptionAlert);
-
+        // let defaultOptionAlert = document.createElement('option');
+        // defaultOptionAlert.value = null;
+        // defaultOptionAlert.text = 'Select an option';
+        // selectAlert.appendChild(defaultOptionAlert);
         let optionAlert;
         dynamicOptions.map(item => {
             optionAlert = document.createElement('option');
@@ -401,23 +459,42 @@ function populateTableAction(data, data2) {
             optionAlert.text = item.name;
             selectAlert.appendChild(optionAlert);
         });
-
         alertCell.appendChild(selectAlert);
-
         selectAlert.addEventListener('change', function () {
             inputData.alert_prompt = this.value;
         });
-
-
         update.push(inputData);
     };
-
     data.update.length > 0 ? data.update.forEach(item => processData(item, data_group.actionButton.update, true)) :
                             data.create.forEach(item => processData(item, data_group.actionButton.create, false));
 }
+// ADD ACTION
+function addRowToTableAction() {
+    const tableBody = document.getElementById('tableAction').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+    let inputData = {
+        name: '',
+        page_redirect: '',
+        alert_prompt: ''
+    };
+    function createAndAppendInput(cell, type, name, value, isCheckbox = false) {
+        let input = document.createElement('input');
+        input.type = type;
+        input.setAttribute('name', name);
+        input.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+        input.setAttribute('value', value);
+        input.addEventListener('change', () => inputData[name] = input.value);
 
+        cell.appendChild(input);
+    }
+    newRow.insertCell(0).innerHTML = `<button class="icon-button selectNodeButton"><div class="icon icon--search"></div></button>`;
+    createAndAppendInput(newRow.insertCell(1), 'text', 'name', inputData.name);
+    createAndAppendInput(newRow.insertCell(2), 'text', 'isRequired', inputData.page_redirect, true);
+    createAndAppendInput(newRow.insertCell(2), 'text', 'draggable', inputData.alert_prompt, true);
+    data_group.actionButton.create.push(inputData);
+}
 
-
+//<!--------------------------------------- TABLE USER STORY  ------------------------------------------->>
 // TABLE Story
 function populateTableStory(data) {
     const tableBody = document.getElementById('userStoryTable').getElementsByTagName('tbody')[0];
@@ -427,10 +504,10 @@ function populateTableStory(data) {
         let newRow = tableBody.insertRow();
         let nameCell = newRow.insertCell(0);
         let nameInput = document.createElement('input');
-        nameInput.style.border = '1px solid gray'
-        nameInput.style.width = '100px'; 
         nameInput.type = 'text';
         nameInput.setAttribute('name', 'name_story');
+        nameInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+        nameInput.setAttribute('placeholder', 'misal: Admin');
         nameInput.setAttribute('value', item.roles); 
         nameCell.appendChild(nameInput);
         nameInput.addEventListener('change', function () {
@@ -438,16 +515,16 @@ function populateTableStory(data) {
         });
         let messageCell = newRow.insertCell(1);
         let storyInput = document.createElement('input');
-        storyInput.style.width = '500px'; 
-        storyInput.style.border = '1px solid gray'
         storyInput.setAttribute('name', 'story_message');
+        storyInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+        storyInput.setAttribute('placeholder', 'misal: dapat melakukan setting terhadap approval ordernya ');
         storyInput.setAttribute('value', item.story); 
         messageCell.appendChild(storyInput);
         storyInput.addEventListener('change', function () {
             inputData.story = this.value
         });
         data_group.userStory.update.push(inputData)
-    })
+    });
 }
 // ADD USER STORY
 function addUserStory() {
@@ -456,10 +533,10 @@ function addUserStory() {
     let inputData = { roles: '', story: '' };
     let nameCell = newRow.insertCell(0);
     let nameInput = document.createElement('input');
-    nameInput.style.border = '1px solid gray'
-    nameInput.style.width = '100px'; 
     nameInput.type = 'text';
     nameInput.setAttribute('name', 'name_story');
+    nameInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+    nameInput.setAttribute('placeholder', 'misal: Admin');
     nameInput.setAttribute('value', ''); 
     nameCell.appendChild(nameInput);
     nameInput.addEventListener('change', function () {
@@ -467,9 +544,9 @@ function addUserStory() {
     });
     let messageCell = newRow.insertCell(1);
     let storyInput = document.createElement('input');
-    storyInput.style.width = '500px'; 
-    storyInput.style.border = '1px solid gray'
     storyInput.setAttribute('name', 'story_message');
+    storyInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+    storyInput.setAttribute('placeholder', 'misal: dapat melakukan setting terhadap approval ordernya ');
     storyInput.setAttribute('value', ''); 
     messageCell.appendChild(storyInput);
     storyInput.addEventListener('change', function () {
@@ -478,6 +555,7 @@ function addUserStory() {
     data_group.userStory.create.push(inputData);
 }
 
+//<!--------------------------------------- TABLE TL  ------------------------------------------->>
 // TABLE TL
 function populateTableTL(data) {
     const tableBody = document.getElementById('technicalLeadTable').getElementsByTagName('tbody')[0];
@@ -487,9 +565,8 @@ function populateTableTL(data) {
         let newRow = tableBody.insertRow();
         let messageCell = newRow.insertCell(0);
         let tlInput = document.createElement('input');
-        tlInput.style.width = '600px'; 
-        tlInput.style.border = '1px solid gray'
         tlInput.setAttribute('name', 'message');
+        tlInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         tlInput.setAttribute('value', item.description); 
         messageCell.appendChild(tlInput);
         tlInput.addEventListener('change', function () {
@@ -502,16 +579,12 @@ function populateTableTL(data) {
 function addTLMessage() {
     const tableBody = document.getElementById('technicalLeadTable').getElementsByTagName('tbody')[0];
     let newRow = tableBody.insertRow();
-    let inputData = {
-        type: 'T',
-        description: ''
-    };
-    // Sel Message
+    let inputData = { type: 'T', description: '' };
     let messageCell = newRow.insertCell(0);
     let tlMessage = document.createElement('input');
-    tlMessage.style.width = '600px'; 
-    tlMessage.style.border = '1px solid gray'
     tlMessage.setAttribute('name', 'tl_message');
+    tlMessage.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+    tlMessage.setAttribute('placeholder', 'Tulis message...')
     tlMessage.setAttribute('value', ''); 
     messageCell.appendChild(tlMessage);
     tlMessage.addEventListener('change', function () {
@@ -520,6 +593,7 @@ function addTLMessage() {
     data_group.detailDescription.create.push(inputData) 
 }
 
+//<!--------------------------------------- TABLE BA  ------------------------------------------->>
 // TABLE BA
 function populateTableBA(data) {
     const tableBody = document.getElementById('bisnisAnalysTable').getElementsByTagName('tbody')[0];
@@ -529,9 +603,8 @@ function populateTableBA(data) {
         let newRow = tableBody.insertRow();
         let messageCell = newRow.insertCell(0);
         let baInput = document.createElement('input');
-        baInput.style.width = '600px'; 
-        baInput.style.border = '1px solid gray'
         baInput.setAttribute('name', 'message');
+        baInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         baInput.setAttribute('value', item.description); 
         messageCell.appendChild(baInput);
         baInput.addEventListener('change', function () {
@@ -540,22 +613,16 @@ function populateTableBA(data) {
         data_group.detailDescription.update.push(inputData);
     })
 }
-
-
 // ADD BA COMMENT
 function addBAComment() {
     const tableBody = document.getElementById('bisnisAnalysTable').getElementsByTagName('tbody')[0];
     let newRow = tableBody.insertRow();
-    let inputData = {
-        type: 'BA',
-        description: ''
-    };
-    // Sel Message
+    let inputData = { type: 'BA', description: '' };
     let messageCell = newRow.insertCell(0);
     let baMessage = document.createElement('input');
-    baMessage.style.width = '600px'; 
-    baMessage.style.border = '1px solid gray'
     baMessage.setAttribute('name', 'ba_message');
+    baMessage.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+    baMessage.setAttribute('placeholder', 'Tulis komentar...')
     baMessage.setAttribute('value', ''); 
     messageCell.appendChild(baMessage);
     baMessage.addEventListener('change', function () {
@@ -564,22 +631,70 @@ function addBAComment() {
     data_group.detailDescription.create.push(inputData) 
 }
 
+//<!--------------------------------------- TABLE MAN HOUR  ------------------------------------------->>
+// TABLE MAN HOUR
+function populateTableHour(data) {
+    const tableBody = document.getElementById('manHourTable').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = "";
+    data && data.forEach(item => {
+        let inputData = { id: item.id, hour: item.hour };
+        let newRow = tableBody.insertRow();
+        let hourCell = newRow.insertCell(0);
+        let menitCell = newRow.insertCell(1);
+        menitCell.innerHTML = `<h3>Jam</h3>`;
+        let hourInput = document.createElement('input');
+        hourInput.setAttribute('name', 'hour');
+        hourInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+        hourInput.setAttribute('value', parseFloat(item.hour)/60); 
+        hourCell.appendChild(hourInput);
+        hourInput.addEventListener('change', function () {
+            inputData.hour = hourInput.value
+        });
+        data_group.manHour.update.push(inputData);
+    })
+}
+// ADD MAN HOUR
+function addManHour() {
+    const tableBody = document.getElementById('manHourTable').getElementsByTagName('tbody')[0];
+    let newRow = tableBody.insertRow();
+    let inputData = { hour: '' };
+    let hourCell = newRow.insertCell(0);
+    let menitCell = newRow.insertCell(1);
+        menitCell.innerHTML = ` <h3>Jam</h3>`;
+    let hourValue = document.createElement('input');
+    hourValue.setAttribute('name', 'hour');
+    hourValue.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+    hourValue.setAttribute('value', ''); 
+    hourCell.appendChild(hourValue);
+    hourValue.addEventListener('change', function () {
+        inputData.hour = parseFloat(this.value) * 60;
+        if (!isNaN(inputData.hour)) {
+            data_group.manHour.create.push({hour: inputData.hour});
+        } else {
+            console.error('Invalid input: not a number');
+        }
+    });
+}
 
-// Function to add the event listener to selectNodeButton elements
+//<!--------------------------------------- SELECT NODE BUTTON  ------------------------------------------->>
 function addSelectNodeButtonListener() {
     document.querySelectorAll('.selectNodeButton').forEach(button => {
         button.addEventListener('click', function(event) {
             const nodeIdToSelect = event.currentTarget.getAttribute('data-nodeid');
             parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
+            if(nodeIdToSelect !== null) parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
+            else parent.postMessage({pluginMessage: { type: 'getComponentFrameData'}}, '*');
+            return event.currentTarget;
         });
     });
 }
-
 // Initial setup of the event listener after rendering the initial DOM
 document.addEventListener('DOMContentLoaded', function() {
     addSelectNodeButtonListener();
 });
 
+
+//<!--------------------------------------- FUNCTION TAB  ------------------------------------------->>
 // Function Tab
 function openTab(evt, tabName) {
     hideAllTabs();
@@ -607,143 +722,6 @@ function markActiveTab(tab) {
     if (textElement && textElement.classList) {
         textElement.classList.add("active-text");
     }
-}
-
-
-
-// ADD COMPONENT
-function addRowToTableComponent() {
-    const tableBody = document.getElementById('tableComponent').getElementsByTagName('tbody')[0];
-    let newRow = tableBody.insertRow();
-    let searchIconCell = newRow.insertCell(0);
-    let nameCell = newRow.insertCell(1);
-    let typeCell = newRow.insertCell(2);
-    let requiredCell = newRow.insertCell(3);
-    let dragableCell = newRow.insertCell(4);
-    let inputData = {
-        name: '',
-        type: '',
-        isRequired: false,
-        draggable: false
-    };
-
-    searchIconCell.innerHTML = `
-        <button class="icon-button selectNodeButton">
-            <div class="icon icon--search"></div>
-        </button>
-    `;
-
-    // Name Input
-    let nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.setAttribute('name', 'name_component');
-    nameInput.setAttribute('value', '');
-    nameCell.appendChild(nameInput);
-    nameInput.addEventListener('change', function () {
-        inputData.name = this.value;
-    });
-
-    // Type Input
-    let typeInput = document.createElement('input');
-    typeInput.type = 'text';
-    typeInput.setAttribute('name', 'page_redirect');
-    typeInput.setAttribute('value', '');
-    typeCell.appendChild(typeInput);
-    typeInput.addEventListener('change', function () {
-        inputData.type = this.value;
-    });
-
-    // Required Input
-    let requiredInput = document.createElement('input');
-    requiredInput.type = 'checkbox';
-    requiredInput.setAttribute('name', 'required_component');
-    requiredInput.setAttribute('value', 'true');  // Set a default value if needed
-    requiredCell.appendChild(requiredInput);
-    requiredInput.addEventListener('change', function () {
-        inputData.isRequired = this.checked;
-    });
-
-    // Dragable Input
-    let dragableInput = document.createElement('input');
-    dragableInput.type = 'checkbox';
-    dragableInput.setAttribute('name', 'required_component');
-    dragableInput.setAttribute('value', 'true');  // Set a default value if needed
-    dragableCell.appendChild(dragableInput);
-    dragableInput.addEventListener('change', function () {
-        inputData.draggable = this.checked;
-    });
-
-    // Add the data to the create array
-    data_group.dataComponent.create.push(inputData);
-}
-// ADD ACTION
-function addRowToTableAction() {
-    const tableBody = document.getElementById('tableAction').getElementsByTagName('tbody')[0];
-    let newRow = tableBody.insertRow();
-    let searchIconCell = newRow.insertCell(0);
-    let nameCell = newRow.insertCell(1);
-    let redirectCell = newRow.insertCell(2);
-    let alertCell = newRow.insertCell(3);
-    let inputData = {
-        name: '',
-        redirect: '',
-        alert: ''
-    };
-    searchIconCell.innerHTML = '<button class="icon-button selectNodeButton"><div class="icon icon--search"></div></button>';
-    //  Name Input
-    let nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.setAttribute('name', 'name_action');
-    nameInput.setAttribute('value', ''); 
-    nameCell.appendChild(nameInput);
-    nameInput.addEventListener('change', function () {
-        inputData.name = this.value;
-    });
-    // Redirect Input
-    let selectRedirect = document.createElement('input');
-    selectRedirect.type = 'text';
-    selectRedirect.setAttribute('name', 'page_redirect');
-    selectRedirect.setAttribute('value', ''); 
-    redirectCell.appendChild(selectRedirect);
-    selectRedirect.addEventListener('change', function () {
-        inputData.redirect = this.value;
-    });
-    // Alert Input
-    let selectAlert = document.createElement('input');
-    selectAlert.type = 'text';
-    selectAlert.setAttribute('name', 'alert_prompt');
-    selectAlert.setAttribute('value', ''); 
-    alertCell.appendChild(selectAlert);
-    selectAlert.addEventListener('change', function () {
-        inputData.alert = this.value;
-    });
-
-    // data_action.push(inputData);
-    data_group.actionButton.create.push(inputData) 
-
-    // let checkbox = document.createElement('input');
-    // checkbox.type = 'checkbox';
-    // checkbox.setAttribute('name', 'rowCheckbox');
-    // checkbox.setAttribute('value', '');
-    // checkboxCell.appendChild(checkbox);
-    // nameInput.addEventListener('input', function () {
-    //     // item.name_action = nameInput.value;
-    // });
-}
-
-
-
-document.getElementById('changeLog').onclick = function() {
-    parent.postMessage({ pluginMessage: { type: 'showChangeLog' } }, '*');  
-    console.log("CLICK")    
-};
-
-//FUNCTION SUBMIT DATA
-function submitData() {
-    parent.postMessage({ pluginMessage: { 
-        type: 'submitDataButton', 
-        data_group: data_group
-    } }, '*');
 }
 
 </script>
