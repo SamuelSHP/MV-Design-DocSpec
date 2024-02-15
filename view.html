@@ -9,15 +9,19 @@
         width: 100%;
         justify-content: space-between;
         align-items: center;
-        margin-top: 32px;
+        margin-bottom: 16px;
+    }
+
+    .tablinks{
+        color: #5C5C5C;
     }
     .tablinks.active {
         color: rgb(0, 0, 0);
         font-weight: bolder;
     }
     th, td {
-        padding: 8px; 
-        border: 1px solid #e2e8f0; 
+        padding: 8px;
+        border-bottom: 1px solid #e2e8f0; 
     }
 </style>
 <div class="p-3">
@@ -33,20 +37,13 @@
             <button onclick="submitData()" class="button button--primary">Submit</button>
         </div> 
     </div>
-    <!-- SELECT TYPE DATA -->
-    <div id="typedata" class="mt-2">
-        <label for="typeFrame">Type:</label>
-        <select id="typeFrame" name="typeFrame">
-            <option value="">select type</option>
-        </select>
-    </div>
     <div id="resultContainer" class="mt-2">
         <!-- Frame Data Section -->
         <div class="frameInfoSection">
             <div class="type type--xlarge type--bold">Frame Information</div>
             <div class="frameInfoPanel">
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                    <thead class="text-xs text-blue-700 font-bold bg-blue-200">
+                <table class="w-full text-sm text-left rtl:text-right text-gray-800 border">
+                    <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                         <tr><th>Name</th><th>Feature</th><th>Page</th><th>Cluster</th><th>Module</th></tr>
                     </thead>
                     <tbody>
@@ -61,44 +58,51 @@
                 </table>
             </div>
         </div>
+        <!-- SELECT TYPE DATA -->
+        <div id="typedata" class="flex flex-col my-4 gap-1">
+            <label for="typeFrame" class="text-sm font-bold">Frame Type</label>
+            <select id="typeFrame" name="typeFrame" class="py-1 px-1 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200">
+                <option value="" class="text-gray-100">Select Type</option>
+            </select>
+        </div>
         <!-- Tabs -->
-        <div class="tabs flex justify-left mt-4">
-            <button class="tablinks mr-3 text-sm active" onclick="openTab(event, 'components')">Component</button>
-            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'action')">Action</button>
-            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'story')">User Story</button>
-            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'technical')">Technical Message</button>
-            <button class="tablinks mr-3 text-sm" onclick="openTab(event, 'ba')">BA Comment</button>
+        <div class="tabs flex justify-left my-4">
+            <button class="tablinks pr-4 text-sm active" onclick="openTab(event, 'components')">Component</button>
+            <button class="tablinks pr-4 text-sm" onclick="openTab(event, 'action')">Action</button>
+            <button class="tablinks pr-4 text-sm" onclick="openTab(event, 'story')">User Story</button>
+            <button class="tablinks pr-4 text-sm" onclick="openTab(event, 'technical')">Technical Message</button>
+            <button class="tablinks pr-4 text-sm" onclick="openTab(event, 'ba')">BA Comment</button>
         </div>
         <!-- COMPONENT TAB -->
         <div id="components" class="tabcontent mt-2">
             <div class="componentDetail" id="groupcomponent">
-                <div class="bg-gray-200 rounded-lg h-auto">
-                    <div class="relative overflow-x-auto rounded-lg">
+                <div class="h-auto">
+                    <div class="relative overflow-x-auto">
                         <table id="tableComponent" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                            <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                            <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                                 <tr>
-                                    <td>&nbsp;</td><td>Name</td><td>Type</td><td>Required</td><td>Dragable</td>
+                                    <td>&nbsp;</td><td class="w-3/12">Name</td><td>Type</td><td>Required</td><td>Dragable</td>
                                     <!-- <td>
                                         <input id="checkAllRows" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                     </td> -->
                                 </tr>
                             </thead>
-                            <tbody class="p-2"></tbody>
+                            <tbody class="p-1"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
             <div class="flex justify-left mt-4">
-                <button id="test" class="text-blue-600 text-xs" onclick="addRowToTableComponent()">+ Add component other</button>
+                <button id="test" class="text-blue-600 text-xs" onclick="addRowToTableComponent()">+ Add Other Component</button>
             </div>
         </div>
         <!-- Action Tabs -->
         <div id="action" class="tabcontent mt-2" style="display:none;">
             <div id="groupAction">
-                <div class="bg-gray-200 rounded-lg h-auto">
-                    <div class="relative overflow-x-auto rounded-lg">
+                <div class="h-auto">
+                    <div class="relative overflow-x-auto">
                         <table id="tableAction" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                            <thead class="text-xs text-blue-700  bg-blue-200 font-bold p-2">
+                            <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                                 <tr>
                                     <td>&nbsp;</td><td>Name</td><td>Redirect</td><td>Alert Prompt</td>
                                     <!-- <td>
@@ -112,30 +116,30 @@
                 </div>
             </div>
             <div class="flex justify-left mt-4">
-                <button id="test" class="text-blue-600 text-xs" onclick="addRowToTableAction()">+ Add action other</button>
+                <button id="test" class="text-blue-600 text-xs" onclick="addRowToTableAction()">+ Add Other Action</button>
             </div>
         </div>
         <!-- User Story Tabs -->
         <div id="story" class="tabcontent mt-2" style="display:none;">
             <div id="userStory">
                 <table id="userStoryTable" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                    <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                    <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                         <tr>
-                            <td>Name User</td><td>Message Story</td>
+                            <td class="w-3/12">Sebagai</td><td class="w-full">Saya ingin</td>
                         </tr>
                     </thead>
                     <tbody class="p-2"></tbody>
                 </table>
             </div>
             <div class="flex justify-left mt-4">
-                <button id="test" class="text-blue-600 text-xs" onclick="addUserStory()">+ Add user story other</button>
+                <button id="test" class="text-blue-600 text-xs" onclick="addUserStory()">+ Add another User Story </button>
             </div>
         </div>
         <!-- TL Tabs -->
         <div id="technical" class="tabcontent mt-2" style="display:none;">
             <div id="technicalLead">
                 <table id="technicalLeadTable" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                    <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                    <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                         <tr>
                             <td>Message</td>
                         </tr>
@@ -144,14 +148,14 @@
                 </table>       
             </div>
             <div class="flex justify-left mt-4">
-                <button id="test" class="text-blue-600 text-xs" onclick="addTLMessage()">+ Add message other</button>
+                <button id="test" class="text-blue-600 text-xs" onclick="addTLMessage()">+ Add another Message</button>
             </div>
         </div>
         <!-- BA Tabs -->
         <div id="ba" class="tabcontent mt-2" style="display:none;">
             <div id="bisnisAnalys">
                 <table id="bisnisAnalysTable" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
-                    <thead class="text-xs text-blue-700 bg-blue-200 font-bold p-2">
+                    <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                         <tr>
                             <td>Comment</td>
                         </tr>
@@ -160,7 +164,7 @@
                 </table>         
             </div>
             <div class="flex justify-left mt-4">         
-                <button id="test" class="text-blue-600 text-xs" onclick="addBAComment()">+ Add comment other</button>
+                <button id="test" class="text-blue-600 text-xs" onclick="addBAComment()">+ Add another Comment</button>
             </div>
         </div>
     </div>
@@ -264,15 +268,17 @@ function populateTableComponent(data) {
         let dragableCell = row.insertCell(4);
 
         searchIconCell.innerHTML = `
-            <button class="icon-button selectNodeButton" data-nodeid="${item.id}">
+            <button class="icon-button selectNodeButton" data-nodeid="${item.code}">
                 <div class="icon icon--search"></div>
             </button>
         `;
+        addSelectNodeButtonListener();
 
         //  Name Input
         let nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.setAttribute('name', 'name_component');
+        nameInput.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         nameInput.setAttribute('value', item.name); 
         nameCell.appendChild(nameInput);
         nameInput.addEventListener('change', function () {
@@ -283,6 +289,7 @@ function populateTableComponent(data) {
         let typeInput = document.createElement('input');
         typeInput.type = 'text';
         typeInput.setAttribute('name', 'type');
+        typeInput.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         typeInput.setAttribute('value', item.type); 
         typeCell.appendChild(typeInput);
         typeInput.addEventListener('change', function () {
@@ -341,15 +348,17 @@ function populateTableAction(data, data2) {
         let alertCell = row.insertCell(3);
 
         searchIconCell.innerHTML = `
-            <button class="icon-button selectNodeButton" data-nodeid="${item.id}">
+            <button class="icon-button selectNodeButton" data-nodeid="${item.code}">
                 <div class="icon icon--search"></div>
             </button>
         `;
+        addSelectNodeButtonListener();
 
         // Name Input
         let nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.setAttribute('name', 'name_component');
+        nameInput.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         nameInput.setAttribute('value', item.name); 
         nameCell.appendChild(nameInput);
         nameInput.addEventListener('change', function () {
@@ -359,6 +368,7 @@ function populateTableAction(data, data2) {
         // Adding select box for page_redirect
         let selectRedirect = document.createElement('select');
         selectRedirect.setAttribute('name', 'page_redirect');
+        selectRedirect.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         selectRedirect.setAttribute('value', item.page_redirect);
 
         // Add default null option
@@ -386,6 +396,7 @@ function populateTableAction(data, data2) {
        // Adding select box for alert_prompt
         let selectAlert = document.createElement('select');
         selectAlert.setAttribute('name', 'alert_prompt');
+        selectAlert.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         selectAlert.setAttribute('value', item.alert_prompt);
 
         // Add default null option
@@ -427,10 +438,10 @@ function populateTableStory(data) {
         let newRow = tableBody.insertRow();
         let nameCell = newRow.insertCell(0);
         let nameInput = document.createElement('input');
-        nameInput.style.border = '1px solid gray'
-        nameInput.style.width = '100px'; 
         nameInput.type = 'text';
         nameInput.setAttribute('name', 'name_story');
+        nameInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+        nameInput.setAttribute('placeholder', 'misal: Admin');
         nameInput.setAttribute('value', item.roles); 
         nameCell.appendChild(nameInput);
         nameInput.addEventListener('change', function () {
@@ -438,9 +449,9 @@ function populateTableStory(data) {
         });
         let messageCell = newRow.insertCell(1);
         let storyInput = document.createElement('input');
-        storyInput.style.width = '500px'; 
-        storyInput.style.border = '1px solid gray'
         storyInput.setAttribute('name', 'story_message');
+        storyInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+        storyInput.setAttribute('placeholder', 'misal: dapat melakukan setting terhadap approval ordernya ');
         storyInput.setAttribute('value', item.story); 
         messageCell.appendChild(storyInput);
         storyInput.addEventListener('change', function () {
@@ -456,10 +467,10 @@ function addUserStory() {
     let inputData = { roles: '', story: '' };
     let nameCell = newRow.insertCell(0);
     let nameInput = document.createElement('input');
-    nameInput.style.border = '1px solid gray'
-    nameInput.style.width = '100px'; 
     nameInput.type = 'text';
     nameInput.setAttribute('name', 'name_story');
+    nameInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+    nameInput.setAttribute('placeholder', 'misal: Admin');
     nameInput.setAttribute('value', ''); 
     nameCell.appendChild(nameInput);
     nameInput.addEventListener('change', function () {
@@ -467,9 +478,9 @@ function addUserStory() {
     });
     let messageCell = newRow.insertCell(1);
     let storyInput = document.createElement('input');
-    storyInput.style.width = '500px'; 
-    storyInput.style.border = '1px solid gray'
     storyInput.setAttribute('name', 'story_message');
+    storyInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+    storyInput.setAttribute('placeholder', 'misal: dapat melakukan setting terhadap approval ordernya ');
     storyInput.setAttribute('value', ''); 
     messageCell.appendChild(storyInput);
     storyInput.addEventListener('change', function () {
@@ -487,9 +498,8 @@ function populateTableTL(data) {
         let newRow = tableBody.insertRow();
         let messageCell = newRow.insertCell(0);
         let tlInput = document.createElement('input');
-        tlInput.style.width = '600px'; 
-        tlInput.style.border = '1px solid gray'
         tlInput.setAttribute('name', 'message');
+        tlInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         tlInput.setAttribute('value', item.description); 
         messageCell.appendChild(tlInput);
         tlInput.addEventListener('change', function () {
@@ -509,9 +519,9 @@ function addTLMessage() {
     // Sel Message
     let messageCell = newRow.insertCell(0);
     let tlMessage = document.createElement('input');
-    tlMessage.style.width = '600px'; 
-    tlMessage.style.border = '1px solid gray'
     tlMessage.setAttribute('name', 'tl_message');
+    tlMessage.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+    tlMessage.setAttribute('placeholder', 'Tulis message...')
     tlMessage.setAttribute('value', ''); 
     messageCell.appendChild(tlMessage);
     tlMessage.addEventListener('change', function () {
@@ -529,9 +539,8 @@ function populateTableBA(data) {
         let newRow = tableBody.insertRow();
         let messageCell = newRow.insertCell(0);
         let baInput = document.createElement('input');
-        baInput.style.width = '600px'; 
-        baInput.style.border = '1px solid gray'
         baInput.setAttribute('name', 'message');
+        baInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
         baInput.setAttribute('value', item.description); 
         messageCell.appendChild(baInput);
         baInput.addEventListener('change', function () {
@@ -553,9 +562,9 @@ function addBAComment() {
     // Sel Message
     let messageCell = newRow.insertCell(0);
     let baMessage = document.createElement('input');
-    baMessage.style.width = '600px'; 
-    baMessage.style.border = '1px solid gray'
     baMessage.setAttribute('name', 'ba_message');
+    baMessage.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+    baMessage.setAttribute('placeholder', 'Tulis komentar...')
     baMessage.setAttribute('value', ''); 
     messageCell.appendChild(baMessage);
     baMessage.addEventListener('change', function () {
@@ -570,7 +579,9 @@ function addSelectNodeButtonListener() {
     document.querySelectorAll('.selectNodeButton').forEach(button => {
         button.addEventListener('click', function(event) {
             const nodeIdToSelect = event.currentTarget.getAttribute('data-nodeid');
-            parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
+            if(nodeIdToSelect !== null) parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
+            else parent.postMessage({pluginMessage: { type: 'getComponentFrameData'}}, '*');
+            return event.currentTarget;
         });
     });
 }
@@ -632,11 +643,13 @@ function addRowToTableComponent() {
             <div class="icon icon--search"></div>
         </button>
     `;
+    addSelectNodeButtonListener();
 
     // Name Input
     let nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.setAttribute('name', 'name_component');
+    nameInput.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
     nameInput.setAttribute('value', '');
     nameCell.appendChild(nameInput);
     nameInput.addEventListener('change', function () {
@@ -647,6 +660,7 @@ function addRowToTableComponent() {
     let typeInput = document.createElement('input');
     typeInput.type = 'text';
     typeInput.setAttribute('name', 'page_redirect');
+    typeInput.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
     typeInput.setAttribute('value', '');
     typeCell.appendChild(typeInput);
     typeInput.addEventListener('change', function () {
@@ -675,6 +689,15 @@ function addRowToTableComponent() {
 
     // Add the data to the create array
     data_group.dataComponent.create.push(inputData);
+
+    onmessage = (event) => {
+        if (event.data.pluginMessage.type === 'setComponentFrameData') {
+            let frame = event.data.pluginMessage.result;
+            typeInput.setAttribute('value', frame.name);
+            let button = nameInput.closest('tr').querySelector('button.selectNodeButton');
+            button.setAttribute('data-nodeid', frame.id);
+        }
+    }
 }
 // ADD ACTION
 function addRowToTableAction() {
@@ -690,10 +713,12 @@ function addRowToTableAction() {
         alert: ''
     };
     searchIconCell.innerHTML = '<button class="icon-button selectNodeButton"><div class="icon icon--search"></div></button>';
+    addSelectNodeButtonListener();
     //  Name Input
     let nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.setAttribute('name', 'name_action');
+    nameInput.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
     nameInput.setAttribute('value', ''); 
     nameCell.appendChild(nameInput);
     nameInput.addEventListener('change', function () {
@@ -703,6 +728,7 @@ function addRowToTableAction() {
     let selectRedirect = document.createElement('input');
     selectRedirect.type = 'text';
     selectRedirect.setAttribute('name', 'page_redirect');
+    selectRedirect.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
     selectRedirect.setAttribute('value', ''); 
     redirectCell.appendChild(selectRedirect);
     selectRedirect.addEventListener('change', function () {
@@ -712,6 +738,7 @@ function addRowToTableAction() {
     let selectAlert = document.createElement('input');
     selectAlert.type = 'text';
     selectAlert.setAttribute('name', 'alert_prompt');
+    selectAlert.setAttribute('class', 'w-full px-2 py-1 border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
     selectAlert.setAttribute('value', ''); 
     alertCell.appendChild(selectAlert);
     selectAlert.addEventListener('change', function () {
@@ -729,6 +756,15 @@ function addRowToTableAction() {
     // nameInput.addEventListener('input', function () {
     //     // item.name_action = nameInput.value;
     // });
+
+    onmessage = (event) => {
+        if (event.data.pluginMessage.type === 'setComponentFrameData') {
+            let frame = event.data.pluginMessage.result;
+            nameInput.setAttribute('value', frame.name);
+            let button = nameInput.closest('tr').querySelector('button.selectNodeButton');
+            button.setAttribute('data-nodeid', frame.id);
+        }
+    }
 }
 
 
