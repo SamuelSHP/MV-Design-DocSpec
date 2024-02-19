@@ -175,9 +175,9 @@
                     <tbody class="p-2"></tbody>
                 </table>         
             </div>
-            <div class="flex justify-left mt-4">         
+            <!-- <div class="flex justify-left mt-4">         
                 <button id="test" class="text-blue-600 text-xs" onclick="addManHour()">+ Add Man Hour</button>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>
@@ -191,7 +191,7 @@ let data_group = {
     userStory: createEmptyObject(),
     detailDescription: createEmptyObject(),
     figmaComment: createEmptyObject(),
-    manHour: createEmptyObject(),
+    man_hour: '',
 };
 //<!--------------------------------------- GROUPING DATA  ------------------------------------------->>
 function createEmptyObject() {
@@ -244,7 +244,7 @@ onmessage = (event) => {
         populateTableStory(msg.data.populateResult?.dataUserStory)
         populateTableTL(msg.data.populateResult?.dataTLComment)
         populateTableBA(msg.data.populateResult?.dataBAComment)
-        populateTableHour(msg.data.populateResult?.dataManHour)
+        populateTableHour(msg.data.populateResult?.dataManHour?.man_hour)
     }
     if (event.data.pluginMessage.type === 'setComponentFrameData') {
         let frame = event.data.pluginMessage.result;
@@ -351,7 +351,7 @@ function populateTableComponent(data) {
             inputData.dragable = dragableInput.checked;
             
         });
-        console.log(inputData.dragable)
+        // console.log(inputData.dragable)
         update.push(inputData);
     };
     data.update.length > 0 ? 
@@ -636,45 +636,47 @@ function addBAComment() {
 function populateTableHour(data) {
     const tableBody = document.getElementById('manHourTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
-    data && data.forEach(item => {
-        let inputData = { id: item.id, hour: item.hour };
-        let newRow = tableBody.insertRow();
-        let hourCell = newRow.insertCell(0);
-        let menitCell = newRow.insertCell(1);
-        menitCell.innerHTML = `<h3>Jam</h3>`;
-        let hourInput = document.createElement('input');
-        hourInput.setAttribute('name', 'hour');
-        hourInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
-        hourInput.setAttribute('value', parseFloat(item.hour)/60); 
-        hourCell.appendChild(hourInput);
-        hourInput.addEventListener('change', function () {
-            inputData.hour = hourInput.value
-        });
-        data_group.manHour.update.push(inputData);
-    })
-}
-// ADD MAN HOUR
-function addManHour() {
-    const tableBody = document.getElementById('manHourTable').getElementsByTagName('tbody')[0];
+    let inputData 
     let newRow = tableBody.insertRow();
-    let inputData = { hour: '' };
     let hourCell = newRow.insertCell(0);
     let menitCell = newRow.insertCell(1);
-        menitCell.innerHTML = ` <h3>Jam</h3>`;
-    let hourValue = document.createElement('input');
-    hourValue.setAttribute('name', 'hour');
-    hourValue.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
-    hourValue.setAttribute('value', ''); 
-    hourCell.appendChild(hourValue);
-    hourValue.addEventListener('change', function () {
-        inputData.hour = parseFloat(this.value) * 60;
-        if (!isNaN(inputData.hour)) {
-            data_group.manHour.create.push({hour: inputData.hour});
-        } else {
-            console.error('Invalid input: not a number');
-        }
+    menitCell.innerHTML = `<h3>Jam</h3>`;
+    let hourInput = document.createElement('input');
+    hourInput.setAttribute('name', 'hour');
+    hourInput.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+    hourInput.setAttribute('value', data/60); 
+    hourCell.appendChild(hourInput);
+    hourInput.addEventListener('change', function () {
+        inputData = hourInput.value
+        // console.log("dawe", inputData)
+        data_group.man_hour = inputData*60;
     });
+    
+    
+    
 }
+// ADD MAN HOUR
+// function addManHour() {
+//     const tableBody = document.getElementById('manHourTable').getElementsByTagName('tbody')[0];
+//     let newRow = tableBody.insertRow();
+//     let inputData = { hour: '' };
+//     let hourCell = newRow.insertCell(0);
+//     let menitCell = newRow.insertCell(1);
+//         menitCell.innerHTML = ` <h3>Jam</h3>`;
+//     let hourValue = document.createElement('input');
+//     hourValue.setAttribute('name', 'hour');
+//     hourValue.setAttribute('class', 'w-full px-2 py-1 text-sm border border-gray-200 rounded-md hover:border-gray-400 focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:opacity-50 text-gray-700');
+//     hourValue.setAttribute('value', ''); 
+//     hourCell.appendChild(hourValue);
+//     hourValue.addEventListener('change', function () {
+//         inputData.hour = parseFloat(this.value) * 60;
+//         if (!isNaN(inputData.hour)) {
+//             data_group.manHour.create.push({hour: inputData.hour});
+//         } else {
+//             console.error('Invalid input: not a number');
+//         }
+//     });
+// }
 
 //<!--------------------------------------- SELECT NODE BUTTON  ------------------------------------------->>
 function addSelectNodeButtonListener() {

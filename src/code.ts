@@ -44,7 +44,7 @@ async function loginUser(url: string, email: any, password: any) {
     }
     const res = await response.json();
     token = res;
-    console.log("data token", token.data.access_token);
+    // console.log("data token", token.data.access_token);
     figma.ui.postMessage({ type: 'login-success', data: res });
     figma.showUI(__uiFiles__.view, { width: 700, height: 580, themeColors: false });
   } catch (error: any) {
@@ -136,7 +136,7 @@ figma.ui.onmessage = async msg => {
           let getDataDescription = dataGET.detailDescription
           let getDataTLComment = dataGET.tComment
           let getDataBAComment = dataGET.baComment
-          let getDataManHour = dataGET.manHour
+          let getDataManHour = dataGET
           populateResult = { 
              dataAction: loopDataGetNew(getDataAction, resultDataAction),  
              dataComponent: loopDataGetNew(getDataComponent, resultDataComponent),  
@@ -146,7 +146,7 @@ figma.ui.onmessage = async msg => {
              dataBAComment: getDataBAComment,
              dataManHour: getDataManHour
           }
-          console.log("Comp", frameData)
+          // console.log("Comp", populateResult.dataManHour)
           figma.ui.postMessage({ type: 'analysisResult', data: {dataGET: data, resultAnalys: frameData, populateResult} });
           figma.notify('Show Data done! \uD83C\uDF89');
         })
@@ -177,12 +177,13 @@ figma.ui.onmessage = async msg => {
       nodeId: selectedFrame.id,
       name: selectedFrame.name,
       type: msg.data_group.type,
+      man_hour: msg.data_group.man_hour,
       actionButton: { ...msg.data_group.actionButton },
       dataComponent: { ...msg.data_group.dataComponent },
       userStory: { ...msg.data_group.userStory },
       detailDescription: { ...msg.data_group.detailDescription },
       figmaComment: { ...msg.data_group.figmaComment },
-      manHour: { ...msg.data_group.manHour },
+      // manHour: { ...msg.data_group.manHour },
     };
     // console.log("test data post:", requestData)
     try {
@@ -339,7 +340,7 @@ function setComponentGroup(): Object | undefined {
           let name = controller.instancePropertyCheck(baseComponent.id, "Label");
           allProps['base'] = controller.instancePropertyCheck(baseComponent.id, "*");
         }else if(c === null){
-          console.log("C is null");
+          // console.log("C is null");
           let name = "c.name";
         }
         controller.setComponentData(id);
