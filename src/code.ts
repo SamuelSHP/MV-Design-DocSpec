@@ -22,7 +22,7 @@ let dataGET: any
 
 console.clear();
 //<!--------------------------------------- FIGMA PLUGIN VIEW UI FIRST  ------------------------------------------->>
-figma.showUI(__uiFiles__.view,{ width:700, height: 580, themeColors: false})
+figma.showUI(__uiFiles__.main,{ width:700, height: 580, themeColors: false})
 figma.skipInvisibleInstanceChildren = true
 
 //<!--------------------------------------- FUNCTION LOGIN  ------------------------------------------->>
@@ -110,9 +110,9 @@ figma.ui.onmessage = async msg => {
       if (syncData) {        
         let frameData = JSON.parse(syncData);
         let fileKeyData = figma.fileKey
-        // let dataToken = token.data.access_token
+        let dataToken = token.data.access_token
         const staticToken = "tZUjr2tRUjEZHdYhEMOCWQypanPTcfKH"
-        await fetch(`${urlMigration}/figma_frame?name=${selectedFrame.name}&frame_id=${selectedFrame.id}&file_key=${fileKeyData}&token=${staticToken}`, {
+        await fetch(`${urlMigration}/figma_frame?name=${selectedFrame.name}&frame_id=${selectedFrame.id}&file_key=${fileKeyData}&token=${dataToken}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -169,9 +169,10 @@ figma.ui.onmessage = async msg => {
 //<!--------------------------------------- SUBMIT DATA  ------------------------------------------->>
   if (msg.type === 'submitDataButton') {
     const staticToken = "tZUjr2tRUjEZHdYhEMOCWQypanPTcfKH";
+    let dataToken = token.data.access_token
     const endpoint = `${urlMigration}/figma_frame`;
     let requestData: any = {
-      token: staticToken,
+      token: dataToken,
       id: `${figma.fileKey}::::${selectedFrame.id}`,
       file_key: figma.fileKey,
       nodeId: selectedFrame.id,
