@@ -9,7 +9,6 @@
         width: 100%;
         justify-content: space-between;
         align-items: center;
-        margin-top: 32px;
         margin-bottom: 16px;
     }
     .tablinks{
@@ -83,7 +82,7 @@
                         <table id="tableComponent" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
                             <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                                 <tr>
-                                    <td>&nbsp;</td><td class="w-3/12">Name</td><td>Type</td><td>Required</td><td>Dragable</td>
+                                    <td>&nbsp;</td><td class="w-3/12">Name</td><td>Type</td><td>Required</td><td>Dragable</td><td>&nbsp;</td>
                                 </tr>
                             </thead>
                             <tbody class="p-1"></tbody>
@@ -103,7 +102,7 @@
                         <table id="tableAction" class="w-full text-sm text-left rtl:text-right text-gray-500 border">
                             <thead class="text-xs text-gray-800 bg-gray-100 font-bold p-2">
                                 <tr>
-                                    <td>&nbsp;</td><td>Name</td><td>Redirect</td><td>Alert Prompt</td>
+                                    <td>&nbsp;</td><td>Name</td><td>Redirect</td><td>Alert Prompt</td><td>&nbsp;</td>
                                 </tr>
                             </thead>
                             <tbody class="p-2"></tbody>
@@ -185,14 +184,15 @@
 
 //<!--------------------------------------- INITIAL DATA  ------------------------------------------->>
 let data_group = {
-    type: '',
+    type: null,
     actionButton: createEmptyObject(),
     dataComponent: createEmptyObject(),
     userStory: createEmptyObject(),
     detailDescription: createEmptyObject(),
     figmaComment: createEmptyObject(),
-    man_hour: '',
+    man_hour: 0,
 };
+let elementClicked;
 //<!--------------------------------------- GROUPING DATA  ------------------------------------------->>
 function createEmptyObject() {
     return {
@@ -220,7 +220,7 @@ function submitData() {
         type: 'submitDataButton', 
         data_group: data_group
     } }, '*');
-    // console.log("submit",data_group)
+    console.log("submit",data_group)
 
 }
 //<!--------------------------------------- DELETE BUTTON  ------------------------------------------->>
@@ -246,10 +246,14 @@ onmessage = (event) => {
         populateTableBA(msg.data.populateResult?.dataBAComment)
         populateTableHour(msg.data.populateResult?.dataManHour?.man_hour)
     }
+
     if (event.data.pluginMessage.type === 'setComponentFrameData') {
         let frame = event.data.pluginMessage.result;
-        nameInput.setAttribute('value', frame.name);
-        let button = nameInput.closest('tr').querySelector('button.selectNodeButton');
+        console.log(frame);
+        let row = elementClicked.closest('tr');
+        let nameInput= row.querySelector('input[name="name_component"]');
+        if(nameInput.value === '') nameInput.setAttribute('value', frame.name);
+        let button = row.querySelector('button.selectNodeButton');
         button.setAttribute('data-nodeid', frame.id);
     }
 };
@@ -304,12 +308,24 @@ function populateTableComponent(data) {
         let typeCell = row.insertCell(2);
         let requiredCell = row.insertCell(3);
         let dragableCell = row.insertCell(4);
+        let deleteRowCell = row.insertCell(5);
         searchIconCell.innerHTML = `
             <button class="icon-button selectNodeButton" data-nodeid="${item.code}">
                 <div class="icon icon--search"></div>
             </button>
         `;
-        addSelectNodeButtonListener();
+        searchIconCell.querySelector('button.selectNodeButton').addEventListener('click', function (){
+            elementClicked = this;
+            const nodeIdToSelect = this.getAttribute('data-nodeid');
+            if(nodeIdToSelect !== null && nodeIdToSelect !== 'undefined') parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
+            else parent.postMessage({pluginMessage: { type: 'getComponentFrameData'}}, '*');
+        });
+        
+        deleteRowCell.innerHTML = `
+            <button class="icon-button deleteRowButton" data-nodeid="${item.code}">
+                <div class="icon icon--trash"></div>
+            </button>
+        `;
         //  Name Input
         let nameInput = document.createElement('input');
         nameInput.type = 'text';
@@ -335,6 +351,7 @@ function populateTableComponent(data) {
         requiredInput.type = 'checkbox';
         requiredInput.setAttribute('name', 'required');
         requiredInput.setAttribute('value', item.required); 
+        requiredInput.setAttribute('class', 'w-full');
         requiredInput.checked = item.required;
         requiredCell.appendChild(requiredInput);
         requiredInput.addEventListener('change', function () {
@@ -345,15 +362,28 @@ function populateTableComponent(data) {
         dragableInput.type = 'checkbox';
         dragableInput.setAttribute('name', 'dragable');
         dragableInput.setAttribute('value', item.dragable);  
+        dragableInput.setAttribute('class', 'w-full');
         dragableInput.checked = item.dragable;
         dragableCell.appendChild(dragableInput);
         dragableInput.addEventListener('change', function () {
             inputData.dragable = dragableInput.checked;
             
         });
-        // console.log(inputData.dragable)
         update.push(inputData);
+        deleteRowCell.querySelector('button.deleteRowButton').addEventListener('click', function(event) {
+            const row = this.closest('tr');
+            const nodeID = this.getAttribute('data-nodeid');
+            if (row){
+                row.remove();
+                data.update = data.update.filter(item => item.code !== nodeID); 
+                data.create = data.create.filter(item => item.code !== nodeID);
+                data.update.length > 0 ? 
+                    data_group.dataComponent.update = data.update :
+                    data_group.dataComponent.create = data.create   
+            }
+        });
     };
+    
     data.update.length > 0 ? 
         data.update.forEach(item => processData(item, data_group.dataComponent.update, true)) : 
         data.create.forEach(item => processData(item, data_group.dataComponent.create, false));
@@ -387,7 +417,29 @@ function addRowToTableComponent() {
     createAndAppendInput(newRow.insertCell(2), 'text', 'type', inputData.type);
     createAndAppendInput(newRow.insertCell(3), 'checkbox', 'isRequired', inputData.isRequired, true);
     createAndAppendInput(newRow.insertCell(4), 'checkbox', 'draggable', inputData.draggable, true);
+    newRow.insertCell(5).innerHTML = `<button class="icon-button deleteRowButton"><div class="icon icon--trash"></div></button>`;
     data_group.dataComponent.create.push(inputData);
+    deleteRowButtonListener();
+
+    onmessage = (event) => {
+        const msg = event.data.pluginMessage;
+        if (event.data.pluginMessage.type === 'setComponentFrameData') {
+            let frame = event.data.pluginMessage.result;
+            let row = input.closest('tr');
+            let button = row.querySelector('button.selectNodeButton');
+            input.setAttribute('value', frame.name);
+            button.setAttribute('data-nodeid', frame.id);
+        }
+
+        
+        if (event.data.pluginMessage.type === 'setComponentFrameData') {
+            let frame = event.data.pluginMessage.result;
+            console.log(frame);
+            // nameInput.setAttribute('value', frame.name);
+            // let button = nameInput.closest('tr').querySelector('button.selectNodeButton');
+            // button.setAttribute('data-nodeid', frame.id);
+        }
+    }
 }
 
 //<!--------------------------------------- TABLE ACTION  ------------------------------------------->>
@@ -409,12 +461,20 @@ function populateTableAction(data, data2) {
         let nameCell = row.insertCell(1);
         let redirectCell = row.insertCell(2);
         let alertCell = row.insertCell(3);
+        let deleteRowCell = row.insertCell(4);
         searchIconCell.innerHTML = `
             <button class="icon-button selectNodeButton" data-nodeid="${item.code}">
                 <div class="icon icon--search"></div>
             </button>
         `;
-        addSelectNodeButtonListener();
+        // addSelectNodeButtonListener();
+
+        deleteRowCell.innerHTML = `
+            <button class="icon-button deleteRowButton">
+                <div class="icon icon--trash"></div>
+            </button>
+        `;
+        deleteRowButtonListener();
         // Name Input
         let nameInput = document.createElement('input');
         nameInput.type = 'text';
@@ -491,7 +551,9 @@ function addRowToTableAction() {
     createAndAppendInput(newRow.insertCell(1), 'text', 'name', inputData.name);
     createAndAppendInput(newRow.insertCell(2), 'text', 'isRequired', inputData.page_redirect, true);
     createAndAppendInput(newRow.insertCell(2), 'text', 'draggable', inputData.alert_prompt, true);
+    newRow.insertCell(4).innerHTML = `<button class="icon-button deleteRowButton"><div class="icon icon--trash"></div></button>`;
     data_group.actionButton.create.push(inputData);
+    deleteRowButtonListener();
 }
 
 //<!--------------------------------------- TABLE USER STORY  ------------------------------------------->>
@@ -681,19 +743,30 @@ function populateTableHour(data) {
 //<!--------------------------------------- SELECT NODE BUTTON  ------------------------------------------->>
 function addSelectNodeButtonListener() {
     document.querySelectorAll('.selectNodeButton').forEach(button => {
-        button.addEventListener('click', function(event) {
-            const nodeIdToSelect = event.currentTarget.getAttribute('data-nodeid');
-            parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
-            if(nodeIdToSelect !== null) parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
+        button.addEventListener('click', function(element) {
+            const nodeIdToSelect = element.currentTarget.getAttribute('data-nodeid');
+            if(nodeIdToSelect !== null && nodeIdToSelect !== 'undefined') parent.postMessage({ pluginMessage: { type: 'selectNodeById', nodeId: nodeIdToSelect } }, '*');
             else parent.postMessage({pluginMessage: { type: 'getComponentFrameData'}}, '*');
-            return event.currentTarget;
         });
     });
 }
 // Initial setup of the event listener after rendering the initial DOM
-document.addEventListener('DOMContentLoaded', function() {
-    addSelectNodeButtonListener();
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     addSelectNodeButtonListener();
+// });
+
+//<!--------------------------------------- DELETE ROW BUTTON  ------------------------------------------->>
+function deleteRowButtonListener() {
+    document.querySelectorAll('.deleteRowButton').forEach(button => {
+        button.addEventListener('click', function(event) {
+            // Get the parent table row (tr)
+            const row = this.closest('tr');
+            // Remove the row from the table
+            if (row) row.remove();
+            // data_group.dataComponent.create.push(row);
+        });
+    });
+}
 
 
 //<!--------------------------------------- FUNCTION TAB  ------------------------------------------->>

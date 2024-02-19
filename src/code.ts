@@ -65,12 +65,18 @@ figma.ui.onmessage = async msg => {
   }
 //<!--------------------------------------- GET FRAME  ------------------------------------------->>
   if (msg.type === 'getComponentFrameData'){
-    const selectedFrame = figma.currentPage.selection[0];
-    const frame = {
-      id: selectedFrame.id,
-      name: selectedFrame.name
-    };
-    figma.ui.postMessage({ type: 'setComponentFrameData', result: frame });
+    const frame = figma.currentPage.selection[0];
+    console.log(frame);
+    if(frame !== undefined){
+        const frameData = {
+        id: frame.id,
+        name: frame.name
+      };
+      if(selectedFrame.id !== frame.id) figma.ui.postMessage({ type: 'setComponentFrameData', result: frameData });
+      else figma.notify("ID frame conflict");
+    } else figma.notify("Frame undefined");
+    
+    figma.currentPage.selection = [];
   }
 //<!--------------------------------------- ANALYS  ------------------------------------------->>
   if (msg.type === 'analyze') {
@@ -97,9 +103,9 @@ figma.ui.onmessage = async msg => {
             childrenGroup: allComponents,
         };
         selectedFrame.setPluginData('frameData', JSON.stringify(frameData));
-        figma.notify('Analyze done! \uD83C\uDF89 Click Show Data.');
+        figma.notify('Analisa selesai. \uD83C\uDF89 Klik Show Data.');
     } else {
-        figma.notify('Please select a Frame');
+        figma.notify('Silakan pilih Frame dulu'); // figma.notify('Please select a Frame');
     }
   }
 //<!--------------------------------------- SHOW DATA  ------------------------------------------->>
@@ -112,6 +118,7 @@ figma.ui.onmessage = async msg => {
         let fileKeyData = figma.fileKey
         let dataToken = token.data.access_token
         const staticToken = "tZUjr2tRUjEZHdYhEMOCWQypanPTcfKH"
+        figma.notify('Loading...');
         await fetch(`${urlMigration}/figma_frame?name=${selectedFrame.name}&frame_id=${selectedFrame.id}&file_key=${fileKeyData}&token=${dataToken}`, {
           method: 'GET',
           headers: {
@@ -148,15 +155,16 @@ figma.ui.onmessage = async msg => {
           }
           // console.log("Comp", populateResult.dataManHour)
           figma.ui.postMessage({ type: 'analysisResult', data: {dataGET: data, resultAnalys: frameData, populateResult} });
-          figma.notify('Show Data done! \uD83C\uDF89');
+          figma.notify('Berhasil memuat data. \uD83C\uDF89');
+          figma.currentPage.selection = [];
         })
         .catch(error => {
           console.error('Fetch error:', error);
         });
       } else {
-        figma.notify('No data found')
+        figma.notify('Data tidak ditemukan')
       }
-    }else figma.notify('Please select a Frame'); 
+    }else figma.notify('Silakan pilih Frame dulu'); 
   }
 //<!--------------------------------------- CHANGE LOG  ------------------------------------------->>
   if (msg.type === 'showChangeLog') {
@@ -186,7 +194,7 @@ figma.ui.onmessage = async msg => {
       figmaComment: { ...msg.data_group.figmaComment },
       // manHour: { ...msg.data_group.manHour },
     };
-    // console.log("test data post:", requestData)
+    console.log("test data post:", requestData)
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -244,19 +252,25 @@ figma.ui.onmessage = async msg => {
 function loopDataGetNew(data1: any[], data2: { filter: (arg0: (item: any) => boolean) => { (): any; new(): any; length: number; }; map: (arg0: (itemRes: any) => void) => void; }) {
   let newDataToPatch: any = data1.filter(itemGET => data2.filter(item => item.code === itemGET.code).length > 0);
   let newDataToCreate: any = data2.filter(itemRes => !newDataToPatch.some((item: { code: any; }) => item.code === itemRes.code));
-  let newDataToDelete: any = data1.filter(itemGET => data2.filter(item => item.code === itemGET.code).length > 0);
+  let newDataToDelete: any = data1.filter(itemGET => data2.filter(item => item.code !== itemGET.code).length > 0);
   const newData = {
     update: newDataToPatch,
     create: newDataToCreate,
     delete: newDataToDelete,
   };
+  newData.create.map((item : any) => {
+    delete item.id 
+    return item;
+  })
   return newData;
 }
 //<!--------------------------------------- SELECT NODE  ------------------------------------------->>
 function selectNodeById(nodeId: string): void {
-  const selectedNode = figma.getNodeById(nodeId);
+  const selectedNode = figma.getNodeById(nodeId) as SceneNode;
   if (selectedNode) {
     // Select the node
+    console.log(selectedNode);
+    figma.currentPage.selection = [selectedNode];
     figma.viewport.scrollAndZoomIntoView([selectedNode]);
     figma.viewport.zoom = 2.0;
   } else {
@@ -348,7 +362,7 @@ function setComponentGroup(): Object | undefined {
         let existingComponent = componentGroup.component.find((comp: { id: any; code: any; name: any; type: any; }) =>  comp.code === controller.componentData.code || (comp.name == controller.componentData.name && comp.type == controller.componentData.type));
         if(!existingComponent){
           componentGroup.component.push({
-            id: controller.componentData.id,
+            // id: controller.componentData.id,
             code: controller.componentData.code,
             name: controller.componentData.name,
             type: controller.componentData.type,
@@ -370,7 +384,7 @@ function setComponentGroup(): Object | undefined {
         let existingComponent = componentGroup.action.find((comp: {id: any; code: any; name: any;}) => comp.code === controller.componentData.code);
         if(!existingComponent){
           componentGroup.action.push({
-            id: controller.componentData.id,
+            // id: controller.componentData.id,
             code: controller.componentData.code,
             name: controller.componentData.name,
             page_redirect: controller.componentData.page_redirect,
